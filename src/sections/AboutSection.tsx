@@ -1,5 +1,5 @@
 // src/sections/AboutSection.tsx
-import React from "react";
+
 import { Link } from "react-router-dom"; // Importa Link para la navegación interna
 
 function AboutSection() {

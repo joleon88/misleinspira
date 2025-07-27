@@ -8,7 +8,6 @@ import ContactPage from "./sections/ContactPage.tsx";
 import ReflectionsSection from "./sections/ReflectionsSection.tsx";
 import TestimonialsSection from "./sections/TestimonialsSection.tsx";
 import ProductsSection from "./sections/ProductsSection.tsx";
-import HeroSection from "./sections/HeroSection.tsx";
 import AboutSection from "./sections/AboutSection.tsx";
 
 function App() {

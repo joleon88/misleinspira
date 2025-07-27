@@ -1,6 +1,5 @@
 // src/components/Footer.tsx
-import React from "react";
-// Importa los iconos de Lucide React
+
 import { Facebook, Instagram, Youtube, Share2 } from "lucide-react";
 
 function Footer() {

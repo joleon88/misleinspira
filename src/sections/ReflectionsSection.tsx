@@ -1,5 +1,5 @@
 // src/sections/ReflectionsSection.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 
 function ReflectionsSection() {
   const [generatedReflection, setGeneratedReflection] = useState<string>(

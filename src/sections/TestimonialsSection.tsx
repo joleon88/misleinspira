@@ -1,5 +1,4 @@
 // src/sections/TestimonialsSection.tsx
-import React from "react";
 
 function TestimonialsSection() {
   return (
