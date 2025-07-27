@@ -46,18 +46,18 @@ function Header() {
             </li>
             <li>
               <Link
-                to="/testimonios"
-                className="relative [font-family:var(--font-poppins)] font-semibold text-lg hover:[color:var(--color-rosa-pastel)] transition-colors duration-300 whitespace-nowrap"
-              >
-                Testimonios
-              </Link>
-            </li>
-            <li>
-              <Link
                 to="/productos"
                 className="relative [font-family:var(--font-poppins)] font-semibold text-lg hover:[color:var(--color-rosa-pastel)] transition-colors duration-300 whitespace-nowrap"
               >
                 Productos
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/testimonios"
+                className="relative [font-family:var(--font-poppins)] font-semibold text-lg hover:[color:var(--color-rosa-pastel)] transition-colors duration-300 whitespace-nowrap"
+              >
+                Testimonios
               </Link>
             </li>
             <li>
