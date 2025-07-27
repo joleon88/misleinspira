@@ -1,6 +1,5 @@
 // src/sections/HeroSection.jsx
 
-
 function HeroSection() {
   return (
     <section
@@ -37,8 +36,8 @@ function HeroSection() {
           <img
             src="IMG-20250726-WA0179.jpg"
             alt="MisleInspira - Mujer sonriendo, mostrando confianza y serenidad."
-            className="max-w-full h-auto object-cover max-h-[600px] rounded-xl shadow-2xl transition-transform duration-300 hover:scale-105"
-            style={{ boxShadow: '0 15px 30px var(--color-sombra-fuerte)' }}
+            className="max-w-full h-auto object-cover max-h-[600px]"
+            
           />
         </div>
       </div>
