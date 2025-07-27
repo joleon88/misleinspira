@@ -11,7 +11,7 @@ function HeroSection() {
           <h1 className="[color:var(--color-gris-carbon)] text-5xl md:text-6xl lg:text-7xl mb-1 leading-tight">
             Despierta tu{" "}
             <span className="[color:var(--color-rosa-pastel)]">Potencial</span>.
-            Vive con Propósito.
+            Vive con <span className="[color:var(--color-rosa-pastel)]">Propósito</span>.
           </h1>
           <p className="[color:var(--color-gris-texto-suave)] text-lg md:text-xl lg:text-2xl mb-8">
             "En <span className="font-bold">MisleInspira</span>, te acompaño a

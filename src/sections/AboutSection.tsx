@@ -7,7 +7,7 @@ function AboutSection() {
     <section id="mi-historia" className="container mx-auto py-24 px-4">
       <div className="text-center mb-16">
         <h2 className="[color:var(--color-gris-carbon)] text-4xl md:text-5xl mb-4">
-          Mi Viaje, Mi{" "}
+          Mi <span className="[color:var(--color-rosa-pastel)]">Viaje</span>, Mi{" "}
           <span className="[color:var(--color-rosa-pastel)]">Esencia</span>
         </h2>
         <p className="max-w-3xl mx-auto text-lg md:text-xl">
