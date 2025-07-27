@@ -3,7 +3,6 @@
 function HeroSection() {
   return (
     <section
-      id="inicio"
       className="flex items-center justify-center min-h-[90vh] [background-color:var(--color-beige-lino)] p-0 text-left"
     >
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center flex-wrap px-4">
