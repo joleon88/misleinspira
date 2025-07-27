@@ -24,7 +24,7 @@ function HeroSection() {
             ayuden a avanzar, estás en el lugar correcto."
           </p>
           <a
-            href="#productos"
+            href="productos"
             className="inline-block px-8 py-4 [background-color:var(--color-rosa-pastel)] [color:var(--color-blanco)] [font-family:var(--font-poppins)] font-bold text-lg rounded-lg shadow-lg hover:[background-color:var(--color-hover-rosa)] transform hover:-translate-y-1 transition-all duration-300"
           >
             Comienza tu Transformación
@@ -35,7 +35,7 @@ function HeroSection() {
           <img
             src="IMG-20250726-WA0179.jpg"
             alt="MisleInspira - Mujer sonriendo, mostrando confianza y serenidad."
-            className="max-w-full h-auto object-cover max-h-[600px]"
+            className="mt-1 max-w-full h-auto object-cover max-h-[600px]"
             
           />
         </div>
