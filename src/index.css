@@ -1,0 +1,112 @@
+/* src/index.css */
+
+/*
+    ¡Esta es la línea correcta para Tailwind CSS v4!
+    Importa todos los estilos de Tailwind.
+*/
+@import "tailwindcss";
+
+/* Importar las fuentes de Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Montserrat:wght@400;700&display=swap");
+
+/* Define tus variables CSS personalizadas dentro de :root */
+:root {
+  /* Colores personalizados (usando nombres semánticos para mayor claridad) */
+  --color-beige-lino: #f5efe6;
+  --color-rosa-pastel: #f8c8dc;
+  --color-verde-menta-suave: #b7d9c9;
+  --color-gris-carbon: #4a4a4a;
+  --color-gris-texto-suave: #5a5a5a; /* Para párrafos en HeroSection */
+  --color-blanco: #ffffff;
+
+  /* Tonos para sombras, bordes, etc. */
+  --color-sombra-ligera: rgba(0, 0, 0, 0.05);
+  --color-sombra-media: rgba(0, 0, 0, 0.1);
+  --color-sombra-fuerte: rgba(0, 0, 0, 0.15);
+  --color-borde-claro: #ddd;
+  --color-hover-rosa: #e6b2c8; /* Tono más oscuro de rosa pastel para hover */
+  --color-sombra-boton-rosa: rgba(248, 200, 220, 0.4);
+  --color-sombra-boton-rosa-hover: rgba(248, 200, 220, 0.6);
+  --color-borde-rosa: #f8c8dc; /* Para el borde del círculo en Mi Historia */
+  --color-borde-verde: #b7d9c9; /* Para el borde del círculo en Reflexiones */
+
+  /* Fuentes personalizadas */
+  --font-poppins: "Poppins", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
+}
+
+/* Aplicar la fuente y los colores base a todo el body */
+body {
+  font-family: var(--font-montserrat);
+  background-color: var(--color-beige-lino);
+  color: var(--color-gris-carbon);
+  line-height: 1.6;
+  /* Evita el desplazamiento horizontal */
+  overflow-x: hidden;
+  /* Desplazamiento suave al hacer clic en enlaces de anclaje */
+  scroll-behavior: smooth;
+  /* Mejor renderizado de fuentes */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Estilos para títulos y párrafos usando variables CSS y @apply de Tailwind */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-poppins);
+  font-weight: 700;
+  color: var(--color-gris-carbon);
+  line-height: 1.2;
+  margin-bottom: 0.8em; /* Ajuste para espacio entre títulos */
+}
+
+/* Ajustes de tamaño responsivo para encabezados */
+h1 {
+  @apply text-5xl md:text-6xl;
+} /* Título principal más grande */
+h2 {
+  @apply text-4xl md:text-5xl;
+}
+h3 {
+  @apply text-3xl md:text-4xl;
+}
+
+/* Estilos para párrafos */
+p {
+  @apply text-lg md:text-xl mb-4; /* Ligeramente más grande para mejor legibilidad */
+}
+
+/* Clases de utilidad personalizadas (si las necesitas, si no, puedes quitarlas) */
+.text-highlight {
+  font-weight: 700;
+} /* Para resaltar palabras clave */
+.color-accent-primary {
+  color: var(--color-rosa-pastel);
+} /* Color de acento principal */
+
+/* Animaciones CSS personalizadas (ya que Tailwind no tiene animación de "slideUp" nativa) */
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
