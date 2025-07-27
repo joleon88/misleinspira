@@ -71,7 +71,7 @@ function ReflectionsSection() {
         </p>
       </div>
       <div className="flex flex-col lg:flex-row items-center justify-center gap-20">
-        <div className="section-image-circle flex-none w-[350px] h-[350px] rounded-full overflow-hidden flex justify-center items-center shadow-xl [border:6px_solid_var(--color-verde-menta-suave)] [background-color:var(--color-beige-lino)] transition-transform duration-300 hover:scale-105">
+        <div className="section-image-circle flex-none w-[350px] h-[350px] rounded-full overflow-hidden flex justify-center items-center shadow-xl [background-color:var(--color-beige-lino)] transition-transform duration-300 hover:scale-105">
           <img
             src="IMG-20250726-WA0177.jpg"
             alt="MisleInspira - Imagen que simboliza la introspección y el pensamiento."
