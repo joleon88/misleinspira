@@ -1,13 +1,15 @@
 // src/sections/HeroSection.jsx
 
+
 function HeroSection() {
   return (
     <section
       id="inicio"
       className="flex items-center justify-center min-h-[90vh] [background-color:var(--color-beige-lino)] p-0 text-left"
     >
-      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center flex-nowrap gap-20 px-4">
-        <div className="inicio-text flex-1 min-w-[400px] max-w-[600px] animate-fadeInSlideUp">
+      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center flex-wrap px-4">
+        {/* Contenedor de texto - centrado en móvil */}
+        <div className="inicio-text flex-1 min-w-[400px] max-w-[600px] animate-fadeInSlideUp text-center lg:text-left"> {/* Añadido text-center para móviles */}
           <h1 className="[color:var(--color-gris-carbon)] text-5xl md:text-6xl lg:text-7xl mb-1 leading-tight">
             Despierta tu{" "}
             <span className="[color:var(--color-rosa-pastel)]">Potencial</span>.
@@ -30,11 +32,13 @@ function HeroSection() {
             Comienza tu Transformación
           </a>
         </div>
+        {/* Contenedor de imagen - centrado en móvil */}
         <div className="inicio-image flex-1 min-w-[400px] flex justify-center items-center">
           <img
             src="IMG-20250726-WA0179.jpg"
             alt="MisleInspira - Mujer sonriendo, mostrando confianza y serenidad."
-            className="max-w-full h-auto object-cover max-h-[600px]"
+            className="max-w-full h-auto object-cover max-h-[600px] rounded-xl shadow-2xl transition-transform duration-300 hover:scale-105"
+            style={{ boxShadow: '0 15px 30px var(--color-sombra-fuerte)' }}
           />
         </div>
       </div>

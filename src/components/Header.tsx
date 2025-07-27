@@ -14,7 +14,7 @@ function Header() {
   return (
     <header className="[background-color:var(--color-beige-lino)] py-5 shadow-md sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center flex-wrap px-4">
-        {/* Logo MisleInspira con icono de hoja */}
+        {/* Logo MisleInspira con icono de hoja */} 
         <Link
           to="/inicio" // Navega a la ruta /inicio
           onClick={handleNavLinkClick} // Cierra el menú si se hace clic en el logo desde el móvil
