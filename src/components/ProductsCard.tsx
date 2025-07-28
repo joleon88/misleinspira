@@ -33,6 +33,7 @@ export const CardProducto = ({
           {precio}
         </p>
         <button className="inline-block mt-3 px-8 py-1 [background-color:var(--color-rosa-pastel)] [color:var(--color-blanco)] [font-family:var(--font-poppins)] font-bold text-lg rounded-lg shadow-lg hover:[background-color:var(--color-hover-rosa)] transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+          onClick: {enlace}
           {boton}
         </button>
       </div>
