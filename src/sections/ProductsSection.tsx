@@ -4,6 +4,8 @@ import guiaMarketing from "../assets/guiaMarketingImg.png";
 import plantillaEstrategial from "../assets/plantillasEstrategiaImg.png";
 import tallerBienestarImg from "../assets/tallerBienestarImg .png";
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
+import checklistContenido from "../assets/checklistContenido.png";
+import guiadeNicho from "../assets/guiadeNicho.png";
 
 function ProductsSection() {
   return (
@@ -61,8 +63,7 @@ function ProductsSection() {
               titulo: "Guía Rápida de Nicho",
               descripcion: "Descubre tu audiencia ideal.",
               precio: "¡Gratis!",
-              imagen:
-                "https://images.unsplash.com/photo-1543286386-713bdd59944f?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
+              imagen: guiadeNicho,
               boton: "Descargar",
               enlace: "",
             },
@@ -70,8 +71,7 @@ function ProductsSection() {
               titulo: "Checklist de Contenido",
               descripcion: "Planifica tu estrategia de contenido.",
               precio: "¡Gratis!",
-              imagen:
-                "https://images.unsplash.com/photo-1520607148719-57305943171e?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
+              imagen: checklistContenido,
               boton: "Descargar",
               enlace: "",
             },

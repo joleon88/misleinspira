@@ -15,8 +15,11 @@ export const CardProducto = ({
   enlace,
   boton,
 }: CardProductoProps) => {
+  const generateURL = (enlace: string) => {
+    console.log(enlace);
+  };
   return (
-    <div className="min-h-[320px] w-full max-w-[280px] [background-color:var(--color-blanco)] rounded-2xl shadow-md hover:shadow-xl overflow-hidden text-center transform hover:-translate-y-2 transition-all duration-300">
+    <div className="min-h-[320px] w-full max-w-[300px] [background-color:var(--color-blanco)] rounded-2xl shadow-md hover:shadow-xl overflow-hidden text-center transform hover:-translate-y-2 transition-all duration-300">
       <img
         src={imagen}
         alt={titulo}
@@ -32,8 +35,10 @@ export const CardProducto = ({
         <p className="[color:var(--color-verde-menta-suave)] font-bold text-base mb-4">
           {precio}
         </p>
-        <button className="inline-block mt-3 px-8 py-1 [background-color:var(--color-rosa-pastel)] [color:var(--color-blanco)] [font-family:var(--font-poppins)] font-bold text-lg rounded-lg shadow-lg hover:[background-color:var(--color-hover-rosa)] transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-          onClick: {enlace}
+        <button
+          className="inline-block mt-3 px-8 py-1 [background-color:var(--color-rosa-pastel)] [color:var(--color-blanco)] [font-family:var(--font-poppins)] font-bold text-lg rounded-lg shadow-lg hover:[background-color:var(--color-hover-rosa)] transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => generateURL(enlace)}
+        >
           {boton}
         </button>
       </div>
