@@ -1,7 +1,8 @@
 // src/components/Header.tsx
 import { useState } from "react";
 import { Link } from "react-router-dom"; // Importa Link de react-router-dom
-import { Leaf, Menu, X } from "lucide-react"; // Iconos de hoja, menú y cerrar de Lucide React
+import miIconoLeaf from "../assets/RamitaDobleIco-removebg.ico";
+import { Menu, X } from "lucide-react"; // Iconos de hoja, menú y cerrar de Lucide React
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,7 +22,11 @@ function Header() {
           className="logo flex items-center [color:var(--color-gris-carbon)] [font-family:var(--font-poppins)] font-bold text-2xl md:text-3xl"
         >
           MisleInsp
-          <Leaf className="h-9 w-9 [fill:var(--color-verde-menta-suave)]" />
+          <img
+            src={miIconoLeaf}
+            alt="Icono Personal"
+            className="h-10 w-9 relative top-[-9px] mx-[-7px] [fill:var(--color-verde-menta-suave)]"
+          />
           ra
         </Link>
 

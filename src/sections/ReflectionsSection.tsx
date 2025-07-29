@@ -1,5 +1,6 @@
 // src/sections/ReflectionsSection.tsx
 import { useState } from "react";
+import OutlinedButton from "../components/OutLinedButton";
 
 function ReflectionsSection() {
   const [generatedReflection, setGeneratedReflection] = useState<string>(
@@ -100,7 +101,7 @@ function ReflectionsSection() {
       </div>
 
       {/* Nueva sección para el generador de reflexiones con LLM */}
-      <div className="reflection-generator mt-20 p-8 [background-color:var(--color-verde-menta-suave)] rounded-xl shadow-md text-center max-w-2xl mx-auto">
+      <div className="reflection-generator mt-20 p-8 [border-color:var(--color-verde-menta-suave)] rounded-xl shadow-md text-center max-w-2xl mx-auto">
         <h3 className="[color:var(--color-gris-carbon)] text-2xl md:text-3xl mb-6">
           Genera tu ✨ Reflexión del Día ✨
         </h3>
@@ -112,14 +113,14 @@ function ReflectionsSection() {
         >
           {generatedReflection}
         </div>
-        <button
-          id="generateReflectionBtn"
+
+        <OutlinedButton
           onClick={generateReflection}
           disabled={isLoading}
-          className="inline-block mt-4 px-8 py-4 [background-color:var(--color-rosa-pastel)] [color:var(--color-blanco)] [font-family:var(--font-poppins)] font-bold text-lg rounded-lg shadow-lg hover:[background-color:var(--color-hover-rosa)] transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-3"
         >
           {isLoading ? "Generando..." : "Generar Reflexión"}
-        </button>
+        </OutlinedButton>
       </div>
     </section>
   );

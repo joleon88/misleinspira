@@ -1,5 +1,7 @@
 // src/sections/ContactPage.jsx
 
+import OutlinedButton from "../components/OutLinedButton";
+
 function ContactPage() {
   return (
     <section
@@ -64,12 +66,11 @@ function ContactPage() {
                 className="w-full p-3 border [border-color:var(--color-borde-claro)] rounded-md [font-family:var(--font-montserrat)] text-lg [background-color:var(--color-beige-lino)] min-h-[150px] resize-y focus:[border-color:var(--color-rosa-pastel)] focus:ring-4 focus:ring-[var(--color-rosa-pastel)] focus:ring-opacity-50 outline-none transition-all duration-300"
               ></textarea>
             </div>
-            <button
-              type="submit"
-              className="inline-block px-10 py-4 [background-color:var(--color-rosa-pastel)] [color:var(--color-blanco)] [font-family:var(--font-poppins)] font-bold text-xl rounded-lg shadow-lg hover:[background-color:var(--color-hover-rosa)] transform hover:-translate-y-1 transition-all duration-300"
-            >
-              Enviar Mensaje
-            </button>
+            <div className="flex items-center justify-center">
+              <OutlinedButton className="mt-2 py-1" type="submit">
+                Enviar Mensaje
+              </OutlinedButton>
+            </div>
           </form>
         </div>
       </div>

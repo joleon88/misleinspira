@@ -1,3 +1,5 @@
+import OutlinedButton from "./OutLinedButton";
+
 interface CardProductoProps {
   imagen: string;
   titulo: string;
@@ -35,12 +37,12 @@ export const CardProducto = ({
         <p className="[color:var(--color-verde-menta-suave)] font-bold text-base mb-4">
           {precio}
         </p>
-        <button
-          className="inline-block mt-3 px-8 py-1 [background-color:var(--color-rosa-pastel)] [color:var(--color-blanco)] [font-family:var(--font-poppins)] font-bold text-lg rounded-lg shadow-lg hover:[background-color:var(--color-hover-rosa)] transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        <OutlinedButton
+          className="mt-2 py-1"
           onClick={() => generateURL(enlace)}
         >
           {boton}
-        </button>
+        </OutlinedButton>
       </div>
     </div>
   );

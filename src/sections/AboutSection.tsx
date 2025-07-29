@@ -1,6 +1,6 @@
 // src/sections/AboutSection.tsx
 
-import { Link } from "react-router-dom"; // Importa Link para la navegación interna
+import OutlinedButton from "../components/OutLinedButton";
 
 function AboutSection() {
   return (
@@ -54,15 +54,11 @@ function AboutSection() {
           </p>
         </div>
       </div>
-      <div className="text-center mt-16">
-        <Link
-          to="/contacto" // O a una sección más detallada si existiera, por ahora apunta a contacto
-          className="inline-block px-8 py-4 [background-color:var(--color-rosa-pastel)] [color:var(--color-blanco)] [font-family:var(--font-poppins)] font-bold text-lg rounded-lg shadow-lg hover:[background-color:var(--color-hover-rosa)] transform hover:-translate-y-1 transition-all duration-300"
-        >
-          Conóceme más
-        </Link>
+      <div className="flex items-center justify-center">
+        <OutlinedButton href="/contacto" className="mt-2">
+          Conóceme Más
+        </OutlinedButton>
       </div>
-      {/* Usar Link de React Router para la navegación */}
     </section>
   );
 }
