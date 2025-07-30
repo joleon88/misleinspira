@@ -113,27 +113,22 @@ function ProductsSection() {
             },
           ]}
         />
-
         {/* Academia */}
-        <div className="text-center mb-24">
-          <h3 className="[color:var(--color-gris-carbon)] text-3xl md:text-4xl mb-8">
-            <span className="[color:var(--color-verde-menta-suave)]">
-              Academia
-            </span>{" "}
-            Digital DWA
-          </h3>
-          <div className="flex justify-center">
-            <CardProducto
-              titulo="Cursos y Mentorías Online"
-              descripcion="Domina el marketing digital y escala tu negocio. Lo tienes todo aquí, aprovechalo."
-              precio=""
-              imagen="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80"
-              boton="Más Información"
-              enlace={""}
-            />
-          </div>
-        </div>
-
+        <CategoriaProductos
+          titulo="Academia Digital"
+          productos={[
+            {
+              titulo: "Academia Digital DWA",
+              descripcion:
+                "Cursos y Mentorías Online. Domina el marketing digital y escala tu negocio. Lo tienes todo aquí, aprovechalo.",
+              precio: "$83.99 USD",
+              imagen:
+                "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
+              boton: "Más Información",
+              enlace: "",
+            },
+          ]}
+        />
         {/* Ofertas */}
         <CategoriaProductos
           titulo="Ofertas Especiales"
