@@ -22,9 +22,9 @@ const OutlinedButton: React.FC<OutlinedButtonProps> = ({
   const baseClasses = `
     inline-block // Ensures the button only takes up necessary width
     px-6 py-3
-    border-2 [border-color:var(--color-rosa-pastel)]
+    border-2 [border-color:var(--color-verde-menta-suave)]
     [color:var(--color-gris-carbon)] // Default text color
-    [background-color:transparent]
+    [background-color:var(--color-rosa-pastel)]
     [font-family:var(--font-poppins)]
     font-bold text-lg
     rounded-full
