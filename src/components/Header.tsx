@@ -138,7 +138,7 @@ function Header() {
                 style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.10))" }}
               />
               <span
-                className="[color:var(--color-verde-menta-suave)] [font-family:var(--font-poppins)] font-bold text-2xl tracking-wide"
+                className="[color:var(--color-gris-carbon)] [font-family:var(--font-poppins)] font-bold text-2xl tracking-wide"
                 style={{
                   letterSpacing: "0.08em",
                   textShadow: "0 1px 8px var(--color-blanco)",
