@@ -17,9 +17,6 @@ export const CardProducto = ({
   enlace,
   boton,
 }: CardProductoProps) => {
-  const generateURL = (enlace: string) => {
-    console.log(enlace);
-  };
   return (
     <div className="min-h-[320px] w-full max-w-[300px] [background-color:var(--color-blanco)] rounded-2xl shadow-md hover:shadow-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300">
       <img
@@ -37,10 +34,7 @@ export const CardProducto = ({
         <p className="[color:var(--color-verde-menta-suave)] font-bold text-base mb-4">
           {precio}
         </p>
-        <OutlinedButton
-          className="mt-2 py-1 w-full"
-          onClick={() => generateURL(enlace)}
-        >
+        <OutlinedButton className="mt-2 w-full" href={enlace}>
           {boton}
         </OutlinedButton>
       </div>

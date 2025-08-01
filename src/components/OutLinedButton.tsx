@@ -1,4 +1,5 @@
 // src/components/OutlinedButton.tsx
+
 import React from "react";
 
 // Define las props para el componente OutlinedButton
@@ -20,7 +21,7 @@ const OutlinedButton: React.FC<OutlinedButtonProps> = ({
   type = "button", // Default to "button" if not specified
 }) => {
   const baseClasses = `
-    inline-block // Ensures the button only takes up necessary width
+    flex items-center justify-center
     px-6 py-3
     border-2 [border-color:var(--color-verde-menta-suave)]
     [color:var(--color-gris-carbon)] // Default text color
@@ -59,8 +60,10 @@ const OutlinedButton: React.FC<OutlinedButtonProps> = ({
     return (
       <a
         href={href}
+        download
+        target="_blank"
+        rel="noopener noreferrer"
         className={`${baseClasses} ${className}`}
-        onClick={onClick}
         aria-disabled={disabled} // For accessibility if used as a disabled link
         type={type} // Pass the type prop to the native button
       >

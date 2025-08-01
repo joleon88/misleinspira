@@ -1,11 +1,12 @@
 import { CategoriaProductos } from "../components/CategoriaProductos";
 import { CardProducto } from "../components/ProductsCard";
-import guiaMarketing from "../assets/guiaMarketingImg.png";
+//import guiaMarketing from "../assets/guiaMarketingImg.png";
 import plantillaEstrategial from "../assets/plantillasEstrategiaImg.png";
 import tallerBienestarImg from "../assets/tallerBienestarImg .png";
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
 import checklistContenido from "../assets/checklistContenido.png";
 import guiadeNicho from "../assets/guiadeNicho.png";
+import guia2025img from "../assets/Guia-2025.jpg";
 
 function ProductsSection() {
   return (
@@ -26,12 +27,14 @@ function ProductsSection() {
       <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-10 place-items-center">
         {/* Producto 1 */}
         <CardProducto
-          titulo="Guía Esencial de Marketing Consciente"
-          descripcion="Conecta con tu audiencia de manera auténtica y ética."
+          titulo="Guía Rápida 2025"
+          descripcion="3 Herraminetas clave para crear contenido impactante. Domina Canva, ChatGPT y CapCut."
           precio="¡Gratuita!"
-          imagen={guiaMarketing}
+          imagen={guia2025img}
           boton="Descargar Ahora"
-          enlace={""}
+          enlace={
+            "https://nzrisfjbrzlwltqfisib.supabase.co/storage/v1/object/public/content-files/Guia-rapida-2025.pdf"
+          }
         />
         {/* Producto 2 */}
         <CardProducto
