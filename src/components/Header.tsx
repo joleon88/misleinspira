@@ -22,7 +22,7 @@ function Header() {
   };
 
   return (
-    <header className="[background-color:var(--color-beige-lino)] py-4 shadow-[0_2px_16px_0_rgba(183,217,201,0.18)] sticky top-0 z-50 transition-shadow duration-300">
+    <header className="[background-color:var(--color-beige-lino)] py-4 shadow-[0_2px_16px_0_rgba(183,217,201,0.40)] sticky top-0 z-50 transition-shadow duration-300">
       <div className="container mx-auto flex justify-between items-center flex-wrap px-4">
         {/* Logo MisleInspira con icono de hoja */}
         <Link
