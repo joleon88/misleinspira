@@ -113,14 +113,15 @@ function ReflectionsSection() {
         >
           {generatedReflection}
         </div>
-
-        <OutlinedButton
-          onClick={generateReflection}
-          disabled={isLoading}
-          className="mt-3"
-        >
-          {isLoading ? "Generando..." : "Generar Reflexión"}
-        </OutlinedButton>
+        <div className="flex justify-center w-full">
+          <OutlinedButton
+            onClick={generateReflection}
+            disabled={isLoading}
+            className="mt-3"
+          >
+            {isLoading ? "Generando..." : "Generar Reflexión"}
+          </OutlinedButton>
+        </div>
       </div>
     </section>
   );

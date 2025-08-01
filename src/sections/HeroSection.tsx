@@ -3,6 +3,7 @@
 import OutlinedButton from "../components/OutLinedButton"; // Asegúrate de que la ruta sea correcta
 import { CheckCircle } from "lucide-react"; // Importa el icono de palomita
 import misleRemoveBg from "../assets/Misle-removebg.png";
+import { Link } from "react-router-dom";
 
 function HeroSection() {
   return (
@@ -60,9 +61,13 @@ function HeroSection() {
               </span>
             </li>
           </ul>
-          <OutlinedButton href="/productos" className="mt-2">
-            Comienza tu Transformación
-          </OutlinedButton>
+          <div className="flex justify-center w-full">
+            <Link to="/productos">
+              <OutlinedButton className="mt-2">
+                Comienza tu Transformación
+              </OutlinedButton>
+            </Link>
+          </div>
         </div>
         {/* Contenedor de imagen - centrado en móvil */}
         <div className="inicio-image flex-1 min-w-[400px] flex justify-center items-center">
