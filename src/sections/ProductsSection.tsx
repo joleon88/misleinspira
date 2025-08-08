@@ -1,6 +1,6 @@
 import { CategoriaProductos } from "../components/CategoriaProductos";
-import { CardProducto } from "../components/ProductsCard";
-//import guiaMarketing from "../assets/guiaMarketingImg.png";
+import { CardProducto } from "../components/ProductsCard"; // Asegúrate de que el import sea correcto
+
 import plantillaEstrategial from "../assets/plantillasEstrategiaImg.png";
 import tallerBienestarImg from "../assets/tallerBienestarImg .png";
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
@@ -25,34 +25,34 @@ function ProductsSection() {
 
       {/* Bloque de productos destacados iniciales */}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-10 place-items-center">
-        {/* Producto 1 */}
+        {/* Producto 1 - Gratuito con descarga */}
         <CardProducto
           titulo="Guía Rápida 2025"
           descripcion="3 Herraminetas clave para crear contenido impactante. Domina Canva, ChatGPT y CapCut."
           precio="¡Gratuita!"
           imagen={guia2025img}
           boton="Descargar Ahora"
-          enlace={
+          urlDescarga={
             "https://nzrisfjbrzlwltqfisib.supabase.co/storage/v1/object/public/content-files/Guia-rapida-2025.pdf"
           }
         />
-        {/* Producto 2 */}
+        {/* Producto 2 - De pago (sin descarga) */}
         <CardProducto
           titulo="Taller Práctico: Bienestar Digital"
           descripcion="Mantén un equilibrio saludable en la era digital."
           precio="$49.99 USD"
           imagen={tallerBienestarImg}
           boton="Inscríbete Aquí"
-          enlace={""}
+          urlDescarga={""}
         />
-        {/* Producto 3 */}
+        {/* Producto 3 - De pago (sin descarga) */}
         <CardProducto
           titulo="Pack de Plantillas: Estrategia Pro"
           descripcion="Recursos para planificar tu contenido y campañas."
           precio="$29.99 USD"
           imagen={plantillaEstrategial}
           boton="Comprar Pack"
-          enlace={""}
+          urlDescarga={""}
         />
       </div>
 
@@ -68,7 +68,7 @@ function ProductsSection() {
               precio: "¡Gratis!",
               imagen: guiadeNicho,
               boton: "Descargar",
-              enlace: "",
+              urlDescarga: "URL_DE_DESCARGA_PARA_GUIA_NICHO", // Aquí va el enlace
             },
             {
               titulo: "Checklist de Contenido",
@@ -76,7 +76,7 @@ function ProductsSection() {
               precio: "¡Gratis!",
               imagen: checklistContenido,
               boton: "Descargar",
-              enlace: "",
+              urlDescarga: "URL_DE_DESCARGA_PARA_CHECKLIST", // Aquí va el enlace
             },
           ]}
         />
@@ -93,7 +93,7 @@ function ProductsSection() {
               imagen:
                 "https://images.unsplash.com/photo-1521405924368-64c5b84bec60?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
               boton: "Comprar",
-              enlace: "",
+              urlDescarga: "",
             },
             {
               titulo: "Guía SEO Avanzada",
@@ -103,7 +103,7 @@ function ProductsSection() {
               imagen:
                 "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
               boton: "Comprar",
-              enlace: "",
+              urlDescarga: "",
             },
             {
               titulo: "Taller Bienestar",
@@ -112,7 +112,7 @@ function ProductsSection() {
               precio: "$49.99",
               imagen: bienestarLaboral, // en este caos no se pasa como un objeto
               boton: "Comprar",
-              enlace: "",
+              urlDescarga: "",
             },
           ]}
         />
@@ -128,7 +128,7 @@ function ProductsSection() {
               imagen:
                 "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
               boton: "Más Información",
-              enlace: "",
+              urlDescarga: "",
             },
           ]}
         />
@@ -143,7 +143,7 @@ function ProductsSection() {
               imagen:
                 "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
               boton: "Comprar Combo",
-              enlace: "",
+              urlDescarga: "",
             },
           ]}
         />

@@ -5,7 +5,7 @@ interface Producto {
   titulo: string;
   descripcion: string;
   precio: string;
-  enlace: string;
+  urlDescarga: string;
   boton: string;
 }
 
