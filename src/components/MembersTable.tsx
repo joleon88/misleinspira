@@ -145,7 +145,7 @@ const MembersTable: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead
             className="text-left"
-            style={{ backgroundColor: themeColors.beigeLino }}
+            style={{ backgroundColor: themeColors.rosaPastel }}
           >
             <tr>
               <th
