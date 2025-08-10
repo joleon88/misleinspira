@@ -9,7 +9,7 @@ import ReflectionsSection from "./sections/ReflectionsSection.tsx";
 import TestimonialsSection from "./sections/TestimonialsSection.tsx";
 import ProductsSection from "./sections/ProductsSection.tsx";
 import AboutSection from "./sections/AboutSection.tsx";
-import DashBoard from "./components/DashBoard.tsx"
+import DashBoard from "./components/Dashboard.tsx";
 
 function App() {
   return (
