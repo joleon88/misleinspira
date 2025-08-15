@@ -2,12 +2,20 @@ import { Home, User, ShoppingBag } from "lucide-react"; // Iconos de hoja, menú
 import { useState } from "react";
 import MembersTable from "./MembersTable";
 import { Link } from "react-router-dom";
+import AddProducts from "./AddProducts";
 
 function DashBoard() {
   const [user, setUser] = useState(false);
+  const [product, setProduct] = useState(false);
 
   const handleUserkClick = () => {
+    setProduct(false);
     setUser(true);
+  };
+
+  const handleProductClick = () => {
+    setUser(false);
+    setProduct(true);
   };
 
   return (
@@ -61,7 +69,7 @@ function DashBoard() {
                 </li>
                 <li className="w-full">
                   <button
-                    onClick={handleUserkClick}
+                    onClick={handleProductClick}
                     className="flex items-center gap-3 py-3 px-2 md:px-4 w-full rounded-xl [font-family:var(--font-poppins)] font-semibold text-left cursor-pointer"
                   >
                     <ShoppingBag className="h-7 w-7 [color:var(--color-verde-menta-suave)]" />
@@ -78,13 +86,26 @@ function DashBoard() {
 
         {/* Contenido principal */}
         <div className="col-span-1 md:col-span-3 overflow-y-auto">
-          {user ? (
-            <div className="p-6">{<MembersTable />}</div>
-          ) : (
+          {/* Si no hay ni user ni product */}
+          {!user && !product && (
             <div className="p-6">
               <h1 className="text-3xl font-bold">
                 Selecciona una opción del menú
               </h1>
+            </div>
+          )}
+
+          {/* Si hay user */}
+          {user && (
+            <div className="p-6">
+              <MembersTable />
+            </div>
+          )}
+
+          {/* Si hay product */}
+          {product && (
+            <div className="p-6">
+              <AddProducts />
             </div>
           )}
         </div>
