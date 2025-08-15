@@ -151,30 +151,30 @@ const MembersTable: React.FC = () => {
               <th
                 scope="col"
                 className="px-4 py-3 sm:px-6 text-xs font-medium uppercase tracking-wider"
-                style={{ color: themeColors.grisTextoSuave }}
+                style={{ color: themeColors.grisCarbon }}
               >
-                Nombre
+                <strong>Nombre</strong>
               </th>
               <th
                 scope="col"
                 className="px-4 py-3 sm:px-6 text-xs font-medium uppercase tracking-wider"
-                style={{ color: themeColors.grisTextoSuave }}
+                style={{ color: themeColors.grisCarbon }}
               >
-                Correo Electrónico
+                <strong>Correo Electrónico</strong>
               </th>
               <th
                 scope="col"
                 className="px-4 py-3 sm:px-6 text-xs font-medium uppercase tracking-wider"
-                style={{ color: themeColors.grisTextoSuave }}
+                style={{ color: themeColors.grisCarbon }}
               >
-                Teléfono
+                <strong>Teléfono</strong>
               </th>
               <th
                 scope="col"
                 className="px-4 py-3 sm:px-6 text-xs font-medium uppercase tracking-wider"
-                style={{ color: themeColors.grisTextoSuave }}
+                style={{ color: themeColors.grisCarbon }}
               >
-                Fecha de Suscripción
+                <strong>Fecha de Suscripción</strong>
               </th>
             </tr>
           </thead>
