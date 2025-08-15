@@ -60,7 +60,7 @@ const AddProducts: React.FC = () => {
     }
 
     const fileName = `${Date.now()}-${imageFile.name.replace(/\s/g, "-")}`;
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(fileName, imageFile);
 
