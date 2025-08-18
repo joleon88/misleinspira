@@ -1,14 +1,63 @@
 import { CategoriaProductos } from "../components/CategoriaProductos";
 import { CardProducto } from "../components/ProductsCard"; // Asegúrate de que el import sea correcto
 
-import plantillaEstrategial from "../assets/plantillasEstrategiaImg.png";
-import tallerBienestarImg from "../assets/tallerBienestarImg .png";
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
 import checklistContenido from "../assets/checklistContenido.png";
 import guiadeNicho from "../assets/guiadeNicho.png";
-import guia2025img from "../assets/Guia-2025.jpg";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+// === CONFIGURACIÓN DE SUPABASE ===
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+interface Produts {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  precio: string;
+  boton_texto_tipo: string;
+  url_descarga_file: string;
+  categoria: string;
+  imagen_url: string;
+}
 
 function ProductsSection() {
+  const [productos, setProductos] = useState<Produts[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // Llama a la tabla 'misleinspira_products'
+        const { data, error } = await supabase
+          .from("misleinspira_products")
+          .select("*");
+
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          console.log("Productos cargados:", data);
+          setProductos(data as Produts[]);
+        }
+      } catch (err: any) {
+        console.error("Error fetching products:", err.message);
+        setError(
+          "No se pudieron cargar los productos. Por favor, inténtalo de nuevo."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <section id="productos" className="container mx-auto py-24 px-4">
       <div className="text-center mb-16">
@@ -23,37 +72,28 @@ function ProductsSection() {
         </p>
       </div>
 
+      {error && <div className="text-red-500 text-center">{error}</div>}
+      {loading && (
+        <div className="flex items-center justify-center p-8 text-center bg-gray-50 rounded-2xl">
+          <p className="text-lg font-semibold">Cargando productos...</p>
+        </div>
+      )}
+
       {/* Bloque de productos destacados iniciales */}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-10 place-items-center">
-        {/* Producto 1 - Gratuito con descarga */}
-        <CardProducto
-          titulo="Guía Rápida 2025"
-          descripcion="3 Herraminetas clave para crear contenido impactante. Domina Canva, ChatGPT y CapCut."
-          precio="¡Gratuita!"
-          imagen={guia2025img}
-          boton="Descargar Ahora"
-          urlDescarga={
-            "https://nzrisfjbrzlwltqfisib.supabase.co/storage/v1/object/public/content-files/Guia-rapida-2025.pdf"
-          }
-        />
-        {/* Producto 2 - De pago (sin descarga) */}
-        <CardProducto
-          titulo="Taller Práctico: Bienestar Digital"
-          descripcion="Mantén un equilibrio saludable en la era digital."
-          precio="$49.99 USD"
-          imagen={tallerBienestarImg}
-          boton="Inscríbete Aquí"
-          urlDescarga={""}
-        />
-        {/* Producto 3 - De pago (sin descarga) */}
-        <CardProducto
-          titulo="Pack de Plantillas: Estrategia Pro"
-          descripcion="Recursos para planificar tu contenido y campañas."
-          precio="$29.99 USD"
-          imagen={plantillaEstrategial}
-          boton="Comprar Pack"
-          urlDescarga={""}
-        />
+        {/* Aquí puedes mapear los productos si tienes datos */}
+
+        {productos.map((producto) => (
+          <CardProducto
+            key={producto.id}
+            titulo={producto.titulo}
+            descripcion={producto.descripcion}
+            precio={producto.precio}
+            imagen={producto.imagen_url}
+            boton={producto.boton_texto_tipo}
+            urlDescarga={producto.url_descarga_file}
+          />
+        ))}
       </div>
 
       {/* NUEVA SECCIÓN */}
