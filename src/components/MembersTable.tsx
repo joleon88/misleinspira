@@ -77,7 +77,7 @@ const MembersTable: React.FC = () => {
   // Renderizado condicional
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8 text-center bg-gray-50 rounded-2xl">
+      <div className="flex items-center justify-center p-2 text-center bg-gray-50 rounded-2xl">
         <Loader2
           className="h-10 w-10 animate-spin mr-3"
           style={{ color: themeColors.rosaPastel }}

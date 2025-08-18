@@ -132,11 +132,11 @@ const AddProducts: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-1">
       <Toaster position="top-center" reverseOrder={false} />
 
       {/* Main form card */}
-      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-2xl w-full transition-all duration-300 transform hover:scale-[1.01]">
+      <div className="bg-white p-5 rounded-2xl shadow-xl max-w-2xl w-full transition-all duration-300 transform hover:scale-[1.01]">
         {/* Card Header */}
         <div className="text-center mb-6">
           <h2 className="text-4xl font-bold" style={{ color: colorGrisCarbon }}>
@@ -320,8 +320,10 @@ const AddProducts: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center py-3 px-4 rounded-full font-semibold text-white transition-colors duration-200 shadow-lg transform hover:scale-105"
-            style={{ backgroundColor: colorRosaPastel, color: "white" }}
+            className="w-full flex items-center justify-center py-3 px-4 rounded-full font-semibold border-2 [border-color:var(--color-verde-menta-suave)] [color:var(--color-gris-carbon)] [background-color:var(--color-rosa-pastel)] [font-family:var(--font-poppins)] font-bold text-lg transition-colors duration-200 shadow-lg transform hover:scale-105"
+            style={{
+              backgroundColor: colorRosaPastel,
+            }}
           >
             {loading && <Loader2 className="animate-spin mr-2" />}
             <span>{loading ? "Guardando..." : "Agregar Producto"}</span>
