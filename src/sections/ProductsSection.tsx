@@ -83,17 +83,23 @@ function ProductsSection() {
       <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-10 place-items-center">
         {/* Aquí puedes mapear los productos si tienes datos */}
 
-        {productos.map((producto) => (
-          <CardProducto
-            key={producto.id}
-            titulo={producto.titulo}
-            descripcion={producto.descripcion}
-            precio={producto.precio}
-            imagen={producto.imagen_url}
-            boton={producto.boton_texto_tipo}
-            urlDescarga={producto.url_descarga_file}
-          />
-        ))}
+        {productos
+          .filter((p) => p.categoria === "principal")
+          .map((producto) => (
+            <CardProducto
+              key={producto.id}
+              titulo={producto.titulo}
+              descripcion={producto.descripcion}
+              precio={
+                producto.precio.toLocaleUpperCase().includes("GRATIS")
+                  ? producto.precio
+                  : `$${producto.precio} USD`
+              }
+              imagen={producto.imagen_url}
+              boton={producto.boton_texto_tipo}
+              urlDescarga={producto.url_descarga_file}
+            />
+          ))}
       </div>
 
       {/* NUEVA SECCIÓN */}

@@ -24,7 +24,7 @@ const AddProducts: React.FC = () => {
   const [formData, setFormData] = useState({
     titulo: "",
     descripcion: "",
-    precio: "",
+    precio: "¡Gratis!",
     boton_texto_tipo: "",
     url_descarga_file: "",
     categoria: "",
@@ -112,7 +112,7 @@ const AddProducts: React.FC = () => {
       setFormData({
         titulo: "",
         descripcion: "",
-        precio: "",
+        precio: "¡Gratis!",
         boton_texto_tipo: "",
         url_descarga_file: "",
         categoria: "",
