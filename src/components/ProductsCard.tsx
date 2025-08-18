@@ -58,7 +58,7 @@ export const CardProducto = ({
         <h4 className="[color:var(--color-gris-carbon)] text-lg font-bold mb-2">
           {titulo}
         </h4>
-        <p className="[color:var(--color-gris-texto-suave)] !text-xs mb-3">
+        <p className="[color:var(--color-gris-texto-suave)] !text-sm mb-3">
           {descripcion}
         </p>
         <p className="[color:var(--color-verde-menta-suave)] font-bold text-base mb-4">
