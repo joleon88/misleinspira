@@ -36,7 +36,8 @@ function ProductsSection() {
         // Llama a la tabla 'misleinspira_products'
         const { data, error } = await supabase
           .from("misleinspira_products")
-          .select("*");
+          .select("*")
+          .order("creado_en", { ascending: false });
 
         if (error) {
           throw error;
