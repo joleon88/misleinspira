@@ -19,7 +19,7 @@ const HeroImage: React.FC = () => {
   return (
     <div className="inicio-image flex-1 min-w-[260px] flex justify-center items-center mt-15 lg:mt-0">
       {/* Contenedor principal */}
-      <div className="relative w-full max-w-[220px] sm:max-w-[400px] aspect-square rounded-full">
+      <div className="relative w-full max-w-[280px] sm:max-w-[400px] aspect-square rounded-full">
         {/* Imagen circular */}
         <div className="relative w-full h-full rounded-full z-10 overflow-hidden">
           <img
@@ -102,10 +102,10 @@ const HeroImage: React.FC = () => {
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 400 100"
-          className="absolute bottom-[-20px] right-[-70px] sm:bottom-[-40px] sm:right-[-150px] rotate-[325deg] z-20 w-[200px] h-[100px] sm:w-[400px] sm:h-[200px]"
+          className="absolute bottom-[-25px] right-[-75px] sm:bottom-[-40px] sm:right-[-150px] rotate-[332deg] sm:rotate-[325deg] z-20 w-[250px] h-[100px] sm:w-[400px] sm:h-[200px]"
         >
           <path
-            d="M20 30 Q150 120 280 40"
+            d="M20 30 Q150 110 280 40"
             stroke={colors.rosaPastel}
             strokeWidth="25"
             strokeLinecap="round"
