@@ -2,7 +2,6 @@
 
 import OutlinedButton from "../components/OutLinedButton"; // Asegúrate de que la ruta sea correcta
 import { CheckCircle } from "lucide-react"; // Importa el icono de palomita
-import misleRemoveBg from "../assets/Misle-removebg.png";
 import { Link } from "react-router-dom";
 import HeroImage from "../components/HeroImage";
 
