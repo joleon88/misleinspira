@@ -4,6 +4,7 @@ import OutlinedButton from "../components/OutLinedButton"; // Asegúrate de que 
 import { CheckCircle } from "lucide-react"; // Importa el icono de palomita
 import misleRemoveBg from "../assets/Misle-removebg.png";
 import { Link } from "react-router-dom";
+import HeroImage from "../components/HeroImage";
 
 function HeroSection() {
   return (
@@ -70,13 +71,7 @@ function HeroSection() {
           </div>
         </div>
         {/* Contenedor de imagen - centrado en móvil */}
-        <div className="inicio-image flex-1 min-w-[400px] flex justify-center items-center">
-          <img
-            src={misleRemoveBg}
-            alt="MisleInspira - Mujer sonriendo, mostrando confianza y serenidad."
-            className="md:mt-4 max-w-full h-auto object-cover max-h-[600px]"
-          />
-        </div>
+        <HeroImage />
       </div>
     </section>
   );
