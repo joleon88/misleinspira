@@ -17,7 +17,7 @@ const colors = {
  */
 const HeroImage: React.FC = () => {
   return (
-    <div className="inicio-image flex-1 min-w-[260px] flex justify-center items-center mt-15 lg:mt-0">
+    <div className="inicio-image flex-1 min-w-[260px] flex justify-center items-center mt-10 lg:mt-0">
       {/* Contenedor principal */}
       <div className="relative w-full max-w-[280px] sm:max-w-[400px] aspect-square rounded-full">
         {/* Imagen circular */}
