@@ -15,6 +15,8 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Create a single Supabase client for your app
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+const colorGrisCarbon = "var(--color-gris-carbon)";
+
 /**
  * Main component for user authentication with Supabase.
  * Handles sign in with email and password.
@@ -90,7 +92,10 @@ const AuthComponent: React.FC = () => {
             </h2>
             <form className="space-y-4" onSubmit={handleSignIn}>
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-600">
+                <label
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: colorGrisCarbon }}
+                >
                   Correo electrónico
                 </label>
                 <input
@@ -98,12 +103,15 @@ const AuthComponent: React.FC = () => {
                   placeholder="tu.correo@ejemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-rosa-pastel)]"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-600">
+                <label
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: colorGrisCarbon }}
+                >
                   Contraseña
                 </label>
                 <input
@@ -111,7 +119,7 @@ const AuthComponent: React.FC = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-rosa-pastel)]"
                   required
                 />
               </div>
@@ -129,7 +137,7 @@ const AuthComponent: React.FC = () => {
         </div>
       ) : (
         // Dashboard Wrapper: This div has the full-screen layout styles only
-        <div className="w-full h-screen bg-gray-100">
+        <div className="w-full h-screen">
           <Dashboard session={session} handleSignOut={handleSignOut} />
         </div>
       )}
