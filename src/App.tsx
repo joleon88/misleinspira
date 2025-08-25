@@ -9,7 +9,7 @@ import ReflectionsSection from "./sections/ReflectionsSection.tsx";
 import TestimonialsSection from "./sections/TestimonialsSection.tsx";
 import ProductsSection from "./sections/ProductsSection.tsx";
 import AboutSection from "./sections/AboutSection.tsx";
-import DashBoard from "./components/Dashboard.tsx";
+import AuthComponent from "./components/AuthComponent.tsx";
 
 function App() {
   return (
@@ -36,7 +36,7 @@ function App() {
             <Route path="/contacto" element={<ContactPage />} />
             {/* Opcional: Una ruta de fallback para 404 o redirigir a la página de inicio */}
             {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
-            <Route path="/admin" element={<DashBoard />} />
+            <Route path="/admin" element={<AuthComponent />} />
           </Routes>
         </main>
 
