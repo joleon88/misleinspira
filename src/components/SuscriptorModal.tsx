@@ -87,13 +87,11 @@ const SubscriptorModal: React.FC<SubscriberModalProps> = ({
       const checkSubscription = async () => {
         setStatus("checking");
         try {
-          const redirectToUrl =
-            window.location.origin + window.location.pathname;
           // Usamos signInWithOtp para verificar si el usuario ya existe y enviar un enlace mágico
           const { error } = await supabase.auth.signInWithOtp({
             email: initialEmail,
             options: {
-              emailRedirectTo: redirectToUrl,
+              emailRedirectTo: window.location.origin,
             },
           });
 
@@ -130,14 +128,12 @@ const SubscriptorModal: React.FC<SubscriberModalProps> = ({
     setStatus("loading");
 
     try {
-      // AÑADIDO: Captura la URL actual para la redirección.
-      const redirectToUrl = window.location.origin + window.location.pathname;
       // PRIMERO: Inicia el flujo de autenticación de Supabase.
       // Supabase enviará el correo electrónico.
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: redirectToUrl,
+          emailRedirectTo: window.location.origin,
         },
       });
 
