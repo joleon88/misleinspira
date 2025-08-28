@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Mail, User, Phone, CheckCircle, Loader2 } from "lucide-react";
 // Importación de Supabase a través de CDN
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type Session } from "@supabase/supabase-js";
 // Importación de react-hot-toast a través de CDN
 import toast, { Toaster } from "react-hot-toast";
 
@@ -16,11 +16,11 @@ interface SubscriberModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialEmail?: string;
-  onSubscriptionSuccess: () => void;
+  onSubscriptionSuccess: (session: Session) => void;
 }
 
 // === COMPONENTE PRINCIPAL ===
-const SubscriberModal: React.FC<SubscriberModalProps> = ({
+const SubscriptorModal: React.FC<SubscriberModalProps> = ({
   isOpen,
   onClose,
   initialEmail = "",
@@ -30,7 +30,10 @@ const SubscriberModal: React.FC<SubscriberModalProps> = ({
   const [email, setEmail] = useState(initialEmail);
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState("initial"); // Estados: 'initial', 'loading', 'checking'
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isEmailSent, setIsEmailSent] = useState(false);
+
+  // CORRECTO: El tipo de estado puede ser Session o null.
+  const [session, setSession] = useState<Session | null>(null);
 
   // Define los colores de tu tema como un objeto para usarlos fácilmente
   const themeColors = {
@@ -44,46 +47,72 @@ const SubscriberModal: React.FC<SubscriberModalProps> = ({
     bordeClaro: "#ddd",
   };
 
-  // useEffect para verificar la suscripción UNA VEZ al abrir el modal, si se proporciona un email inicial
+  // CORRECTO: useEffect para escuchar los cambios de estado de autenticación de Supabase.
+  useEffect(() => {
+    // Solo activamos el listener si el modal está abierto.
+    if (!isOpen) return;
+
+    // Almacenamos el objeto de la suscripción directamente.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      // Cuando el usuario se autentica a través del enlace mágico, la sesión cambia.
+      if (event === "SIGNED_IN" && session) {
+        setSession(session);
+        // Llamamos a la función de éxito y le pasamos la sesión.
+        toast.success(
+          "¡Autenticación exitosa! La descarga comenzará en breve.",
+          {
+            icon: "🎉",
+            style: {
+              background: themeColors.beigeLino,
+              color: themeColors.grisCarbon,
+            },
+          }
+        );
+        setTimeout(() => {
+          onSubscriptionSuccess(session);
+          onClose();
+        }, 5000);
+      }
+    });
+    // Limpiamos la suscripción cuando el componente se desmonta.
+    // Esta es la forma correcta de evitar fugas de memoria.
+    return () => subscription.unsubscribe();
+  }, [isOpen, onClose, onSubscriptionSuccess, themeColors]);
+
+  // useEffect para verificar la suscripción, ahora usa el email.
   useEffect(() => {
     if (isOpen && initialEmail) {
       const checkSubscription = async () => {
         setStatus("checking");
         try {
-          const { error } = await supabase
-            .from("misleinspira_suscriptors")
-            .select("email")
-            .eq("email", initialEmail)
-            .single();
+          // Usamos signInWithOtp para verificar si el usuario ya existe y enviar un enlace mágico
+          const { error } = await supabase.auth.signInWithOtp({
+            email: initialEmail,
+            options: {
+              emailRedirectTo: window.location.origin,
+            },
+          });
 
-          if (error && error.code !== "PGRST116") {
-            // PGRST116 significa "no se encontró la fila"
+          if (error) {
             throw error;
           }
 
-          if (!error) {
-            // El usuario ya existe, mostramos el toast y luego llamamos a la función de éxito
-            setIsSubscribed(true);
-            toast.success(
-              "¡Genial! Ya estás suscrito. Tu descarga comenzará en breve.",
-              {
-                icon: "�",
-                style: {
-                  background: themeColors.beigeLino,
-                  color: themeColors.grisCarbon,
-                },
-              }
-            );
-            // Llamamos a la función onSubscriptionSuccess después del delay
-            setTimeout(() => {
-              onSubscriptionSuccess();
-              onClose();
-            }, 5000); // 5 segundos de retraso
-          } else {
-            // El usuario no existe, permite el formulario
-            setIsSubscribed(false);
-            setStatus("initial");
-          }
+          // Si no hay error, el email fue enviado,
+          // informamos al usuario y esperamos que haga clic en el enlace.
+          toast.success(
+            "¡Genial! Si ya estás suscrito, revisa tu correo para el enlace de descarga.",
+            {
+              icon: "📧",
+              style: {
+                background: themeColors.beigeLino,
+                color: themeColors.grisCarbon,
+              },
+            }
+          );
+          setStatus("initial"); // Volvemos al estado inicial después de enviar el email.
+          setIsEmailSent(true);
         } catch (error: any) {
           console.error("Error al verificar suscripción:", error.message);
           toast.error("Ocurrió un error al verificar. Inténtalo de nuevo.");
@@ -92,90 +121,65 @@ const SubscriberModal: React.FC<SubscriberModalProps> = ({
       };
       checkSubscription();
     }
-  }, [isOpen, initialEmail, onClose, onSubscriptionSuccess, themeColors]);
+  }, [isOpen, initialEmail, themeColors]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
 
     try {
-      const { error } = await supabase
-        .from("misleinspira_suscriptors")
-        .insert([{ name, email, phone }])
-        .select();
+      // PRIMERO: Inicia el flujo de autenticación de Supabase.
+      // Supabase enviará el correo electrónico.
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
 
       if (error) {
-        // Verifica si el error es de clave duplicada (código 23505 de PostgreSQL)
-        if (error.code === "23505") {
-          toast.success("¡Ya estás suscrito! Tu descarga comenzará en breve.", {
-            icon: "🎉",
-            style: {
-              background: themeColors.beigeLino,
-              color: themeColors.grisCarbon,
-            },
-          });
-          // Llamamos a la función onSubscriptionSuccess después del delay
-          setTimeout(() => {
-            onSubscriptionSuccess();
-            onClose();
-          }, 5000); // 5 segundos de retraso
-        } else {
-          // Si es otro tipo de error, lo lanza
-          throw error;
-        }
-      } else {
-        // Manejo de suscripción exitosa
-        setStatus("initial");
-        toast.success(
-          "¡Gracias por suscribirte! Tu descarga comenzará en breve.",
-          {
-            icon: "🚀",
-            style: {
-              background: themeColors.beigeLino,
-              color: themeColors.grisCarbon,
-            },
-          }
-        );
-        // Llamamos a la función onSubscriptionSuccess después del delay
-        setTimeout(() => {
-          onSubscriptionSuccess();
-          onClose();
-        }, 5000); // 5 segundos de retraso
+        throw error;
       }
+
+      // SOLO DESPUÉS: Si el email se envió correctamente, guarda los datos en tu tabla.
+      // Esto es opcional, pero mantiene tu lista de suscriptores con nombre y teléfono.
+      const { error: insertError } = await supabase
+        .from("misleinspira_suscriptors")
+        .upsert([{ name, email, phone }], { onConflict: "email" }); // Usamos upsert para evitar duplicados.
+
+      if (insertError) {
+        console.error(
+          "Error al guardar en la tabla de suscriptores:",
+          insertError.message
+        );
+      }
+
+      setStatus("initial");
+      setIsEmailSent(true);
+      toast.success(
+        "¡Revisa tu correo! Hemos enviado un enlace de inicio de sesión.",
+        {
+          icon: "🚀",
+          style: {
+            background: themeColors.beigeLino,
+            color: themeColors.grisCarbon,
+          },
+        }
+      );
     } catch (error: any) {
       console.error("Error al suscribir:", error.message);
       setStatus("initial");
-      // Muestra un mensaje de error genérico si no es un error de clave duplicada
-      if (error.code !== "23505") {
-        toast.error(
-          "Hubo un problema. Por favor, revisa tus datos e inténtalo de nuevo."
-        );
-      }
+      toast.error(
+        "Hubo un problema. Por favor, revisa tus datos e inténtalo de nuevo."
+      );
     }
   };
 
   if (!isOpen) return null;
 
   const renderContent = () => {
-    if (status === "checking") {
-      return (
-        <div
-          className="flex flex-col items-center justify-center p-8 text-center"
-          style={{ color: themeColors.grisTextoSuave }}
-        >
-          <Loader2
-            className="h-12 w-12 animate-spin mb-4"
-            style={{ color: themeColors.verdeMentaSuave }}
-          />
-          <h2 className="text-xl font-semibold [font-family:var(--font-poppins)]">
-            Verificando suscripción...
-          </h2>
-          <p className="mt-2 text-sm">Esto podría tomar un momento.</p>
-        </div>
-      );
-    }
-
-    if (isSubscribed) {
+    // Si la sesión ya existe, mostramos el mensaje de éxito directamente
+    if (session) {
       return (
         <div
           className="flex flex-col items-center justify-center p-8 text-center"
@@ -186,10 +190,29 @@ const SubscriberModal: React.FC<SubscriberModalProps> = ({
             style={{ color: themeColors.rosaPastel }}
           />
           <h2 className="text-xl font-semibold [font-family:var(--font-poppins)]">
-            ¡Ya eres parte de nuestra comunidad!
+            ¡Autenticación exitosa!
+          </h2>
+          <p className="mt-2 text-sm">La descarga comenzará en breve.</p>
+        </div>
+      );
+    }
+
+    if (isEmailSent) {
+      return (
+        <div
+          className="flex flex-col items-center justify-center p-8 text-center"
+          style={{ color: themeColors.grisTextoSuave }}
+        >
+          <Mail
+            className="h-12 w-12 mb-4"
+            style={{ color: themeColors.verdeMentaSuave }}
+          />
+          <h2 className="text-xl font-semibold [font-family:var(--font-poppins)]">
+            Revisa tu correo electrónico
           </h2>
           <p className="mt-2 text-sm">
-            Gracias por tu interés. La descarga comenzará en breve.
+            Hemos enviado un enlace mágico a **{email}**. Haz clic en él para
+            completar tu suscripción.
           </p>
         </div>
       );
@@ -204,6 +227,7 @@ const SubscriberModal: React.FC<SubscriberModalProps> = ({
           Únete a la comunidad
         </h2>
 
+        {/* ... (rest of the form fields are the same) ... */}
         {/* Campo de Nombre */}
         <div className="relative mb-4">
           <User
@@ -330,11 +354,10 @@ const SubscriberModal: React.FC<SubscriberModalProps> = ({
             ></path>
           </svg>
         </button>
-
         {renderContent()}
       </div>
     </div>
   );
 };
 
-export default SubscriberModal;
+export default SubscriptorModal;

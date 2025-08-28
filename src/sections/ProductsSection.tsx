@@ -1,5 +1,5 @@
 import { CategoriaProductos } from "../components/CategoriaProductos";
-import { CardProducto } from "../components/ProductsCard"; // Asegúrate de que el import sea correcto
+import ProductsCard from "../components/ProductsCard"; // Asegúrate de que el import sea correcto
 
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
 import checklistContenido from "../assets/checklistContenido.png";
@@ -87,7 +87,7 @@ function ProductsSection() {
         {productos
           .filter((p) => p.categoria === "principal")
           .map((producto) => (
-            <CardProducto
+            <ProductsCard
               key={producto.id}
               titulo={producto.titulo}
               descripcion={producto.descripcion}

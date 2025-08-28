@@ -1,4 +1,4 @@
-import { CardProducto } from "./ProductsCard";
+import ProductsCard from "./ProductsCard";
 
 interface Producto {
   imagen: string;
@@ -25,7 +25,7 @@ export const CategoriaProductos = ({
       </h3>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-10 place-items-center">
         {productos.map((producto, index) => (
-          <CardProducto key={index} {...producto} />
+          <ProductsCard key={index} {...producto} />
         ))}
       </div>
     </section>
