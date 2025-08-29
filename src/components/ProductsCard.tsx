@@ -1,12 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import OutlinedButton from "./OutLinedButton";
 import SubscriberModal from "./SuscriptorModal";
 import { type Session } from "@supabase/supabase-js";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface CardProductoProps {
   imagen: string;
@@ -14,6 +9,8 @@ interface CardProductoProps {
   descripcion: string;
   precio: string;
   urlDescarga: string;
+  productoId: number;
+  esGratis: boolean;
   boton: string;
 }
 
@@ -23,50 +20,34 @@ const ProductsCard = ({
   descripcion,
   precio,
   urlDescarga,
+  productoId,
+  esGratis,
   boton,
 }: CardProductoProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const listener = (e: any) => {
-      handleDownload(e.detail.session, e.detail.filePath);
-    };
-    window.addEventListener("trigger-download", listener);
-    return () => window.removeEventListener("trigger-download", listener);
-  }, []);
-
-  const handleOpenModal = async () => {
-    const { data } = await supabase.auth.getSession();
-    if (data?.session) {
-      // Usuario ya autenticado → descarga directa
-      handleDownload(data.session, urlDescarga);
-    } else {
-      // Guardar archivo pendiente y abrir modal
-      localStorage.setItem("pendingDownload", urlDescarga);
-      setIsModalOpen(true);
-    }
-  };
-
+  const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setDownloadError(null);
   };
 
-  const handleDownload = async (session: Session, filePath = urlDescarga) => {
+  const handleDownload = async (session: Session) => {
     setIsDownloading(true);
     setDownloadError(null);
+
     try {
       const response = await fetch(
-        `${supabaseUrl}/functions/v1/create-signed-url`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({ filePath }),
+          body: JSON.stringify({ filePath: urlDescarga, productoId, esGratis }),
         }
       );
 
@@ -76,21 +57,20 @@ const ProductsCard = ({
       }
 
       const { signedUrl } = await response.json();
-      if (!signedUrl)
-        throw new Error("La función no devolvió una URL firmada.");
+      if (!signedUrl) throw new Error("No se generó URL firmada");
 
       const link = document.createElement("a");
       link.href = signedUrl;
-      link.download = filePath.replace(/ /g, "_") + ".pdf";
+      link.download = urlDescarga.replace(/ /g, "_") + ".pdf";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (error: any) {
-      setDownloadError(
-        "Hubo un error al preparar la descarga. Inténtalo de nuevo."
-      );
+      console.error("Error al descargar:", error.message);
+      setDownloadError("No se pudo descargar el archivo. Intenta de nuevo.");
     } finally {
       setIsDownloading(false);
+      handleCloseModal();
     }
   };
 
@@ -99,14 +79,14 @@ const ProductsCard = ({
       <img
         src={imagen}
         alt={titulo}
-        className="w-full h-32 object-cover border-b"
+        className="w-full h-32 object-cover border-b border-beige-lino"
       />
       <div className="p-5">
         <h4 className="text-lg font-bold mb-2">{titulo}</h4>
         <p className="text-sm mb-3">{descripcion}</p>
         <p className="font-bold text-base mb-4">{precio}</p>
         <OutlinedButton
-          className="mt-2 w-full"
+          className="w-full"
           onClick={handleOpenModal}
           disabled={isDownloading}
         >
@@ -117,7 +97,7 @@ const ProductsCard = ({
         <SubscriberModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          onSubscriptionSuccess={(session) => handleDownload(session)}
+          onSubscriptionSuccess={handleDownload}
         />
       )}
       {downloadError && (

@@ -22,6 +22,7 @@ interface Produts {
   url_descarga_file: string;
   categoria: string;
   imagen_url: string;
+  esGratis: boolean;
 }
 
 function ProductsSection() {
@@ -116,6 +117,8 @@ function ProductsSection() {
           .map((producto) => (
             <ProductsCard
               key={producto.id}
+              productoId={producto.id} // ⚡ Aquí
+              esGratis={producto.esGratis} // ⚡ Aquí
               titulo={producto.titulo}
               descripcion={producto.descripcion}
               precio={
