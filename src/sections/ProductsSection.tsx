@@ -1,14 +1,11 @@
 import { CategoriaProductos } from "../components/CategoriaProductos";
 import ProductsCard from "../components/ProductsCard";
-
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
 import checklistContenido from "../assets/checklistContenido.png";
 import guiadeNicho from "../assets/guiadeNicho.png";
-
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// === CONFIGURACIÓN DE SUPABASE ===
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -30,24 +27,26 @@ function ProductsSection() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 👉 Detectar redirección tras magic link y disparar descarga automática
+  // 👉 Detectar redirección tras confirmar email
   useEffect(() => {
     const handleRedirect = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data?.session) {
-        console.log(
-          "Usuario autenticado tras redirección:",
-          data.session.user.email
-        );
+      const { data: sessionData, error } = await supabase.auth.getSession();
+      if (error)
+        return console.error("Error recuperando sesión:", error.message);
 
-        const pendingFile = localStorage.getItem("pendingDownload");
-        if (pendingFile) {
+      const session = sessionData?.session;
+      if (session && session.user.email_confirmed_at) {
+        console.log("Usuario verificado tras redirección:", session.user.email);
+
+        // 🔹 Usar query param "download" para descarga automática
+        const searchParams = new URLSearchParams(window.location.search);
+        const fileToDownload = searchParams.get("download");
+        if (fileToDownload) {
           window.dispatchEvent(
             new CustomEvent("trigger-download", {
-              detail: { filePath: pendingFile, session: data.session },
+              detail: { filePath: fileToDownload, session },
             })
           );
-          localStorage.removeItem("pendingDownload");
         }
       }
     };
@@ -64,15 +63,10 @@ function ProductsSection() {
           .order("creado_en", { ascending: false });
 
         if (error) throw error;
-
-        if (data) {
-          setProductos(data as Produts[]);
-        }
+        if (data) setProductos(data as Produts[]);
       } catch (err: any) {
         console.error("Error fetching products:", err.message);
-        setError(
-          "No se pudieron cargar los productos. Por favor, inténtalo de nuevo."
-        );
+        setError("No se pudieron cargar los productos. Intenta de nuevo.");
       } finally {
         setLoading(false);
       }

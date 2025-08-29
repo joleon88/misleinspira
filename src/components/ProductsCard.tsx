@@ -29,8 +29,6 @@ const ProductsCard = ({
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const handleOpenModal = () => {
-    // Guardamos en localStorage para que se pueda disparar la descarga tras magic link
-    localStorage.setItem("pendingDownload", urlDescarga);
     setIsModalOpen(true);
   };
 
@@ -79,10 +77,12 @@ const ProductsCard = ({
     }
   };
 
-  // Listener global para descargas automáticas tras magic link
+  // 🔹 Escucha el evento global para descarga automática
   useEffect(() => {
     const listener = (e: any) => {
-      handleDownload(e.detail.session);
+      if (e.detail.filePath === urlDescarga) {
+        handleDownload(e.detail.session);
+      }
     };
     window.addEventListener("trigger-download", listener);
     return () => window.removeEventListener("trigger-download", listener);
@@ -107,6 +107,7 @@ const ProductsCard = ({
           {isDownloading ? "Preparando..." : boton}
         </OutlinedButton>
       </div>
+
       {isModalOpen && (
         <SubscriberModal
           isOpen={isModalOpen}
@@ -114,6 +115,7 @@ const ProductsCard = ({
           onSubscriptionSuccess={handleDownload}
         />
       )}
+
       {downloadError && (
         <div className="text-red-500 text-center mt-2 px-4">
           {downloadError}
