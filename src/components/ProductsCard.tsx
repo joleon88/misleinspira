@@ -28,25 +28,16 @@ const ProductsCard = ({
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  const handleOpenModal = () => setIsModalOpen(true);
+  const handleOpenModal = () => {
+    // Guardamos en localStorage para que se pueda disparar la descarga tras magic link
+    localStorage.setItem("pendingDownload", urlDescarga);
+    setIsModalOpen(true);
+  };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setDownloadError(null);
   };
-
-  // 🔹 Listener para descarga automática tras magic link
-  useEffect(() => {
-    const listener = (event: CustomEvent) => {
-      const { filePath, session } = event.detail;
-      if (filePath === urlDescarga && session) {
-        handleDownload(session);
-      }
-    };
-    window.addEventListener("trigger-download", listener as EventListener);
-
-    return () =>
-      window.removeEventListener("trigger-download", listener as EventListener);
-  }, [urlDescarga]);
 
   const handleDownload = async (session: Session) => {
     setIsDownloading(true);
@@ -88,6 +79,15 @@ const ProductsCard = ({
     }
   };
 
+  // Listener global para descargas automáticas tras magic link
+  useEffect(() => {
+    const listener = (e: any) => {
+      handleDownload(e.detail.session);
+    };
+    window.addEventListener("trigger-download", listener);
+    return () => window.removeEventListener("trigger-download", listener);
+  }, [urlDescarga]);
+
   return (
     <div className="min-h-[320px] w-full max-w-[300px] bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300">
       <img
@@ -107,7 +107,6 @@ const ProductsCard = ({
           {isDownloading ? "Preparando..." : boton}
         </OutlinedButton>
       </div>
-
       {isModalOpen && (
         <SubscriberModal
           isOpen={isModalOpen}
@@ -115,7 +114,6 @@ const ProductsCard = ({
           onSubscriptionSuccess={handleDownload}
         />
       )}
-
       {downloadError && (
         <div className="text-red-500 text-center mt-2 px-4">
           {downloadError}

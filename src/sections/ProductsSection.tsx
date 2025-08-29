@@ -1,5 +1,5 @@
 import { CategoriaProductos } from "../components/CategoriaProductos";
-import ProductsCard from "../components/ProductsCard"; // Import correcto
+import ProductsCard from "../components/ProductsCard";
 
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
 import checklistContenido from "../assets/checklistContenido.png";
@@ -30,17 +30,16 @@ function ProductsSection() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 👉 Detectar redirección tras magic link
+  // 👉 Detectar redirección tras magic link y disparar descarga automática
   useEffect(() => {
     const handleRedirect = async () => {
-      const { data, error } = await supabase.auth.getSession();
+      const { data } = await supabase.auth.getSession();
       if (data?.session) {
         console.log(
           "Usuario autenticado tras redirección:",
           data.session.user.email
         );
 
-        // ⚡ Recuperar producto pendiente de descarga
         const pendingFile = localStorage.getItem("pendingDownload");
         if (pendingFile) {
           window.dispatchEvent(
@@ -50,8 +49,6 @@ function ProductsSection() {
           );
           localStorage.removeItem("pendingDownload");
         }
-      } else if (error) {
-        console.error("Error recuperando sesión:", error.message);
       }
     };
     handleRedirect();
@@ -67,7 +64,10 @@ function ProductsSection() {
           .order("creado_en", { ascending: false });
 
         if (error) throw error;
-        if (data) setProductos(data as Produts[]);
+
+        if (data) {
+          setProductos(data as Produts[]);
+        }
       } catch (err: any) {
         console.error("Error fetching products:", err.message);
         setError(
