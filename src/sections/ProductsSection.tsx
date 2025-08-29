@@ -146,6 +146,8 @@ function ProductsSection() {
               imagen: guiadeNicho,
               boton: "Descargar",
               urlDescarga: "URL_DE_DESCARGA_PARA_GUIA_NICHO", // Aquí va el enlace
+              esGratis: true,
+              productoId: 11111515,
             },
             {
               titulo: "Checklist de Contenido",
@@ -154,6 +156,8 @@ function ProductsSection() {
               imagen: checklistContenido,
               boton: "Descargar",
               urlDescarga: "URL_DE_DESCARGA_PARA_CHECKLIST", // Aquí va el enlace
+              esGratis: true,
+              productoId: 11111133331515,
             },
           ]}
         />
@@ -171,6 +175,8 @@ function ProductsSection() {
                 "https://images.unsplash.com/photo-1521405924368-64c5b84bec60?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
               boton: "Comprar",
               urlDescarga: "",
+              esGratis: false,
+              productoId: 111111515151515,
             },
             {
               titulo: "Guía SEO Avanzada",
@@ -181,6 +187,8 @@ function ProductsSection() {
                 "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
               boton: "Comprar",
               urlDescarga: "",
+              esGratis: false,
+              productoId: 11122222151515,
             },
             {
               titulo: "Taller Bienestar",
@@ -190,6 +198,8 @@ function ProductsSection() {
               imagen: bienestarLaboral, // en este caos no se pasa como un objeto
               boton: "Comprar",
               urlDescarga: "",
+              esGratis: false,
+              productoId: 1111115515,
             },
           ]}
         />
@@ -206,6 +216,8 @@ function ProductsSection() {
                 "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
               boton: "Más Información",
               urlDescarga: "",
+              esGratis: false,
+              productoId: 111116651515,
             },
           ]}
         />
@@ -221,6 +233,8 @@ function ProductsSection() {
                 "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
               boton: "Comprar Combo",
               urlDescarga: "",
+              esGratis: false,
+              productoId: 111117751515,
             },
           ]}
         />
