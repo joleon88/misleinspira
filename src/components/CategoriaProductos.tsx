@@ -7,6 +7,8 @@ interface Producto {
   precio: string;
   urlDescarga: string;
   boton: string;
+  productoId: number;
+  esGratis: boolean;
 }
 
 interface CategoriaProductosProps {
