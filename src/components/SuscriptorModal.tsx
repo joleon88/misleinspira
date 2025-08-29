@@ -59,21 +59,11 @@ const SubscriptorModal: React.FC<SubscriberModalProps> = ({
       // Cuando el usuario se autentica a través del enlace mágico, la sesión cambia.
       if (event === "SIGNED_IN" && session) {
         setSession(session);
-        // Llamamos a la función de éxito y le pasamos la sesión.
-        toast.success(
-          "¡Autenticación exitosa! La descarga comenzará en breve.",
-          {
-            icon: "🎉",
-            style: {
-              background: themeColors.beigeLino,
-              color: themeColors.grisCarbon,
-            },
-          }
-        );
-        setTimeout(() => {
-          onSubscriptionSuccess(session);
-          onClose();
-        }, 5000);
+        toast.success("¡Autenticación exitosa! Preparando descarga...", {
+          icon: "🎉",
+        });
+        onSubscriptionSuccess(session); // 🚀 descarga inmediata
+        onClose();
       }
     });
     // Limpiamos la suscripción cuando el componente se desmonta.

@@ -11,6 +11,10 @@ import ProductsSection from "./sections/ProductsSection.tsx";
 import AboutSection from "./sections/AboutSection.tsx";
 import AuthComponent from "./components/AuthComponent.tsx";
 
+
+
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -45,5 +49,6 @@ function App() {
     </BrowserRouter>
   );
 }
+
 
 export default App;

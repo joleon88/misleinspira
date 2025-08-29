@@ -27,8 +27,35 @@ interface Produts {
 function ProductsSection() {
   const [productos, setProductos] = useState<Produts[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
   const [error, setError] = useState<string | null>(null);
+
+  // 👉 Detectar redirección después de confirmar email
+  useEffect(() => {
+    const handleRedirect = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (data?.session) {
+        console.log(
+          "Usuario autenticado tras redirección:",
+          data.session.user.email
+        );
+
+        // ⚡ Si venía con un producto a descargar, lo recuperamos de localStorage
+        const pendingFile = localStorage.getItem("pendingDownload");
+        if (pendingFile) {
+          window.dispatchEvent(
+            new CustomEvent("trigger-download", {
+              detail: { filePath: pendingFile, session: data.session },
+            })
+          );
+          localStorage.removeItem("pendingDownload");
+        }
+      } else if (error) {
+        console.error("Error recuperando sesión:", error.message);
+      }
+    };
+    handleRedirect();
+  }, []);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
