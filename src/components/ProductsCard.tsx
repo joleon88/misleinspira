@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import OutlinedButton from "./OutLinedButton";
 import SubscriberModal from "./SuscriptorModal";
 import { type Session } from "@supabase/supabase-js";
@@ -34,13 +34,27 @@ const ProductsCard = ({
     setDownloadError(null);
   };
 
+  // 🔹 Listener para descarga automática tras magic link
+  useEffect(() => {
+    const listener = (event: CustomEvent) => {
+      const { filePath, session } = event.detail;
+      if (filePath === urlDescarga && session) {
+        handleDownload(session);
+      }
+    };
+    window.addEventListener("trigger-download", listener as EventListener);
+
+    return () =>
+      window.removeEventListener("trigger-download", listener as EventListener);
+  }, [urlDescarga]);
+
   const handleDownload = async (session: Session) => {
     setIsDownloading(true);
     setDownloadError(null);
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-signed-url`,
         {
           method: "POST",
           headers: {
@@ -93,6 +107,7 @@ const ProductsCard = ({
           {isDownloading ? "Preparando..." : boton}
         </OutlinedButton>
       </div>
+
       {isModalOpen && (
         <SubscriberModal
           isOpen={isModalOpen}
@@ -100,6 +115,7 @@ const ProductsCard = ({
           onSubscriptionSuccess={handleDownload}
         />
       )}
+
       {downloadError && (
         <div className="text-red-500 text-center mt-2 px-4">
           {downloadError}

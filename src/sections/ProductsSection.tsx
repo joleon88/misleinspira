@@ -1,5 +1,5 @@
 import { CategoriaProductos } from "../components/CategoriaProductos";
-import ProductsCard from "../components/ProductsCard"; // Asegúrate de que el import sea correcto
+import ProductsCard from "../components/ProductsCard"; // Import correcto
 
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
 import checklistContenido from "../assets/checklistContenido.png";
@@ -30,7 +30,7 @@ function ProductsSection() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 👉 Detectar redirección después de confirmar email
+  // 👉 Detectar redirección tras magic link
   useEffect(() => {
     const handleRedirect = async () => {
       const { data, error } = await supabase.auth.getSession();
@@ -40,7 +40,7 @@ function ProductsSection() {
           data.session.user.email
         );
 
-        // ⚡ Si venía con un producto a descargar, lo recuperamos de localStorage
+        // ⚡ Recuperar producto pendiente de descarga
         const pendingFile = localStorage.getItem("pendingDownload");
         if (pendingFile) {
           window.dispatchEvent(
@@ -61,20 +61,13 @@ function ProductsSection() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        // Llama a la tabla 'misleinspira_products'
         const { data, error } = await supabase
           .from("misleinspira_products")
           .select("*")
           .order("creado_en", { ascending: false });
 
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          console.log("Productos cargados:", data);
-          setProductos(data as Produts[]);
-        }
+        if (error) throw error;
+        if (data) setProductos(data as Produts[]);
       } catch (err: any) {
         console.error("Error fetching products:", err.message);
         setError(
@@ -108,17 +101,14 @@ function ProductsSection() {
         </div>
       )}
 
-      {/* Bloque de productos destacados iniciales */}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-10 place-items-center">
-        {/* Aquí puedes mapear los productos si tienes datos */}
-
         {productos
           .filter((p) => p.categoria === "principal")
           .map((producto) => (
             <ProductsCard
               key={producto.id}
-              productoId={producto.id} // ⚡ Aquí
-              esGratis={producto.esGratis} // ⚡ Aquí
+              productoId={producto.id}
+              esGratis={producto.esGratis}
               titulo={producto.titulo}
               descripcion={producto.descripcion}
               precio={
@@ -133,7 +123,7 @@ function ProductsSection() {
           ))}
       </div>
 
-      {/* NUEVA SECCIÓN */}
+      {/* Secciones adicionales */}
       <div className="mt-24">
         {/* Gratuitos */}
         <CategoriaProductos
@@ -145,7 +135,7 @@ function ProductsSection() {
               precio: "¡Gratis!",
               imagen: guiadeNicho,
               boton: "Descargar",
-              urlDescarga: "URL_DE_DESCARGA_PARA_GUIA_NICHO", // Aquí va el enlace
+              urlDescarga: "URL_DE_DESCARGA_PARA_GUIA_NICHO",
               esGratis: true,
               productoId: 11111515,
             },
@@ -155,7 +145,7 @@ function ProductsSection() {
               precio: "¡Gratis!",
               imagen: checklistContenido,
               boton: "Descargar",
-              urlDescarga: "URL_DE_DESCARGA_PARA_CHECKLIST", // Aquí va el enlace
+              urlDescarga: "URL_DE_DESCARGA_PARA_CHECKLIST",
               esGratis: true,
               productoId: 11111133331515,
             },
@@ -193,9 +183,9 @@ function ProductsSection() {
             {
               titulo: "Taller Bienestar",
               descripcion:
-                "Siente el preceso como en casa. Haz que tu vida sea mas cómoda y duradera.",
+                "Siente el proceso como en casa. Haz que tu vida sea más cómoda y duradera.",
               precio: "$49.99",
-              imagen: bienestarLaboral, // en este caos no se pasa como un objeto
+              imagen: bienestarLaboral,
               boton: "Comprar",
               urlDescarga: "",
               esGratis: false,
@@ -203,6 +193,7 @@ function ProductsSection() {
             },
           ]}
         />
+
         {/* Academia */}
         <CategoriaProductos
           titulo="Academia Digital"
@@ -210,7 +201,7 @@ function ProductsSection() {
             {
               titulo: "Academia Digital DWA",
               descripcion:
-                "Cursos y Mentorías Online. Domina el marketing digital y escala tu negocio. Lo tienes todo aquí, aprovechalo.",
+                "Cursos y Mentorías Online. Domina el marketing digital y escala tu negocio. Lo tienes todo aquí, aprovéchalo.",
               precio: "$83.99 USD",
               imagen:
                 "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",
@@ -221,13 +212,14 @@ function ProductsSection() {
             },
           ]}
         />
+
         {/* Ofertas */}
         <CategoriaProductos
           titulo="Ofertas Especiales"
           productos={[
             {
               titulo: "Combo Ebook + Taller",
-              descripcion: "Paga uno y lleva dos. Uno el complemento del otro.",
+              descripcion: "Paga uno y lleva dos. Uno es complemento del otro.",
               precio: "$59.99 USD",
               imagen:
                 "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=125&q=80",

@@ -50,11 +50,15 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
     setStatus("loading");
 
     try {
+      // Guardamos la página actual para redirigir después de la verificación
+      const redirectPath = window.location.pathname;
+      localStorage.setItem("redirectAfterVerify", redirectPath);
+
       // Envía el magic link
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: window.location.origin, // vuelve a tu sitio
+          emailRedirectTo: window.location.origin + redirectPath, // vuelve a la misma página
         },
       });
       if (error) throw error;
