@@ -12,6 +12,7 @@ interface SubscriberModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialEmail?: string;
+  productId: number; // 👉 Nueva propiedad para el ID del producto
   onSubscriptionSuccess: (session: Session) => void;
 }
 
@@ -19,6 +20,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   isOpen,
   onClose,
   initialEmail = "",
+  productId, // 👉 Recibe el ID del producto
   onSubscriptionSuccess,
 }) => {
   const [name, setName] = useState("");
@@ -38,7 +40,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
         setSession(session);
         toast.success("¡Autenticación exitosa! Preparando descarga…");
         onSubscriptionSuccess(session); // dispara la descarga segura
-        onClose(); // ← ahora sí usamos onClose
+        onClose();
       }
     });
 
@@ -50,15 +52,14 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
     setStatus("loading");
 
     try {
-      // Guardamos la página actual para redirigir después de la verificación
-      const redirectPath = window.location.pathname;
-      localStorage.setItem("redirectAfterVerify", redirectPath);
+      // 👉 Construye la URL de redirección con el ID del producto
+      const redirectUrl = `${window.location.origin}/productos?product_id=${productId}`;
 
       // Envía el magic link
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: window.location.origin + redirectPath, // vuelve a la misma página
+          emailRedirectTo: redirectUrl, // Usa la URL robusta
         },
       });
       if (error) throw error;
@@ -86,18 +87,17 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   return (
     <div
       className="fixed inset-0 z-[1050] flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose} // ← cierra al hacer clic fuera
+      onClick={onClose}
     >
       <Toaster position="bottom-center" />
       <div
         className="bg-white rounded-3xl w-full max-w-lg p-8 relative"
-        onClick={(e) => e.stopPropagation()} // no cerrar al hacer clic dentro
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Botón cerrar */}
         <button
           className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"
           aria-label="Cerrar"
-          onClick={onClose} // ← usa onClose
+          onClick={onClose}
         >
           <svg
             className="w-6 h-6 text-gray-500"
@@ -114,7 +114,6 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
           </svg>
         </button>
 
-        {/* Contenido */}
         {session ? (
           <div className="flex flex-col items-center gap-3 text-center">
             <CheckCircle className="w-10 h-10" />

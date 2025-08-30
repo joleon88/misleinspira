@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
-import OutlinedButton from "./OutLinedButton";
+import { useState } from "react";
+
 import SubscriberModal from "./SuscriptorModal";
 import { type Session } from "@supabase/supabase-js";
+import OutlinedButton from "./OutLinedButton";
+import { downloadFile } from "../util/DownloadUtility";
 
 interface CardProductoProps {
   imagen: string;
@@ -37,89 +39,62 @@ const ProductsCard = ({
     setDownloadError(null);
   };
 
+  /**
+   * Maneja el flujo de descarga después de una suscripción o inicio de sesión exitosos.
+   * Llama a la función de utilidad para manejar la lógica de la Edge Function.
+   */
   const handleDownload = async (session: Session) => {
     setIsDownloading(true);
     setDownloadError(null);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-signed-url`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ filePath: urlDescarga, productoId, esGratis }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Error: ${response.status}`);
-      }
-
-      const { signedUrl } = await response.json();
-      if (!signedUrl) throw new Error("No se generó URL firmada");
-
-      const link = document.createElement("a");
-      link.href = signedUrl;
-      link.download = urlDescarga.replace(/ /g, "_") + ".pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Llama a la función de utilidad para gestionar la descarga
+      await downloadFile(urlDescarga, session, productoId, esGratis);
     } catch (error: any) {
-      console.error("Error al descargar:", error.message);
-      setDownloadError("No se pudo descargar el archivo. Intenta de nuevo.");
+      setDownloadError(error.message);
     } finally {
       setIsDownloading(false);
       handleCloseModal();
     }
   };
 
-  // 🔹 Escucha el evento global para descarga automática
-  useEffect(() => {
-    const listener = (e: any) => {
-      if (e.detail.filePath === urlDescarga) {
-        handleDownload(e.detail.session);
-      }
-    };
-    window.addEventListener("trigger-download", listener);
-    return () => window.removeEventListener("trigger-download", listener);
-  }, [urlDescarga]);
-
   return (
-    <div className="min-h-[320px] w-full max-w-[300px] bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300">
+    <div className="min-h-[320px] w-full max-w-[300px] [background-color:var(--color-blanco)] rounded-2xl shadow-md hover:shadow-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300">
       <img
         src={imagen}
         alt={titulo}
-        className="w-full h-32 object-cover border-b border-beige-lino"
+        className="w-full h-32 object-cover border-b [border-color:var(--color-beige-lino)]"
       />
       <div className="p-5">
-        <h4 className="text-lg font-bold mb-2">{titulo}</h4>
-        <p className="text-sm mb-3">{descripcion}</p>
-        <p className="font-bold text-base mb-4">{precio}</p>
+        <h4 className="[color:var(--color-gris-carbon)] text-lg font-bold mb-2">
+          {titulo}
+        </h4>
+        <p className="[color:var(--color-gris-texto-suave)] !text-sm mb-3">
+          {descripcion}
+        </p>
+        <p className="[color:var(--color-verde-menta-suave)] font-bold text-base mb-4">
+          {precio}
+        </p>
         <OutlinedButton
-          className="w-full"
+          className="mt-2 w-full"
           onClick={handleOpenModal}
           disabled={isDownloading}
         >
           {isDownloading ? "Preparando..." : boton}
         </OutlinedButton>
       </div>
-
+      {downloadError && (
+        <div className="text-red-500 text-center mt-2 px-4">
+          {downloadError}
+        </div>
+      )}
       {isModalOpen && (
         <SubscriberModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           onSubscriptionSuccess={handleDownload}
+          productId={productoId}
         />
-      )}
-
-      {downloadError && (
-        <div className="text-red-500 text-center mt-2 px-4">
-          {downloadError}
-        </div>
       )}
     </div>
   );

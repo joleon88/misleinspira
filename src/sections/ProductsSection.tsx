@@ -5,12 +5,15 @@ import checklistContenido from "../assets/checklistContenido.png";
 import guiadeNicho from "../assets/guiadeNicho.png";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { useLocation } from "react-router-dom";
+import { downloadFile } from "../util/DownloadUtility";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface Produts {
+  esGratis: boolean;
   id: number;
   titulo: string;
   descripcion: string;
@@ -19,39 +22,69 @@ interface Produts {
   url_descarga_file: string;
   categoria: string;
   imagen_url: string;
-  esGratis: boolean;
 }
 
 function ProductsSection() {
   const [productos, setProductos] = useState<Produts[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+
+  // Función para encontrar un producto por ID
+  const findProductById = (id: number) => {
+    return productos.find((p) => p.id === id);
+  };
 
   // 👉 Detectar redirección tras confirmar email
   useEffect(() => {
     const handleRedirect = async () => {
-      const { data: sessionData, error } = await supabase.auth.getSession();
-      if (error)
-        return console.error("Error recuperando sesión:", error.message);
-
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+      if (sessionError) {
+        console.error("Error recuperando sesión:", sessionError.message);
+        return;
+      }
       const session = sessionData?.session;
-      if (session && session.user.email_confirmed_at) {
-        console.log("Usuario verificado tras redirección:", session.user.email);
 
-        // 🔹 Usar query param "download" para descarga automática
-        const searchParams = new URLSearchParams(window.location.search);
-        const fileToDownload = searchParams.get("download");
-        if (fileToDownload) {
-          window.dispatchEvent(
-            new CustomEvent("trigger-download", {
-              detail: { filePath: fileToDownload, session },
-            })
-          );
+      // 🔹 Usar query param "product_id" para descarga automática
+      const searchParams = new URLSearchParams(location.search);
+      const productIdStr = searchParams.get("product_id");
+
+      if (session && productIdStr) {
+        const productId = parseInt(productIdStr, 10);
+        if (isNaN(productId)) return;
+
+        console.log(
+          "Usuario verificado tras redirección, buscando producto ID:",
+          productId
+        );
+
+        // Espera a que los productos se hayan cargado antes de intentar la descarga
+        if (productos.length > 0) {
+          const product = findProductById(productId);
+          if (product) {
+            try {
+              // Llama a la función de utilidad refactorizada
+              await downloadFile(
+                product.url_descarga_file,
+                session,
+                product.id,
+                product.esGratis
+              );
+              // Limpia el parámetro de la URL para evitar descargas repetidas
+              history.replaceState(null, "", location.pathname);
+            } catch (err: any) {
+              console.error("Error al iniciar descarga por redirección:", err);
+            }
+          } else {
+            console.error("Producto no encontrado para el ID:", productId);
+          }
         }
       }
     };
+    // El efecto se ejecutará cada vez que la ubicación cambie y los productos estén disponibles.
     handleRedirect();
-  }, []);
+  }, [location.search, productos]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -62,11 +95,18 @@ function ProductsSection() {
           .select("*")
           .order("creado_en", { ascending: false });
 
-        if (error) throw error;
-        if (data) setProductos(data as Produts[]);
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          setProductos(data as Produts[]);
+        }
       } catch (err: any) {
         console.error("Error fetching products:", err.message);
-        setError("No se pudieron cargar los productos. Intenta de nuevo.");
+        setError(
+          "No se pudieron cargar los productos. Por favor, inténtalo de nuevo."
+        );
       } finally {
         setLoading(false);
       }
