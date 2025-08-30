@@ -28,64 +28,59 @@ function ProductsSection() {
   const [productos, setProductos] = useState<Produts[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloadAttempted, setDownloadAttempted] = useState(false); // 🚩 Nueva bandera de estado
   const location = useLocation();
 
   const findProductById = (id: number) => {
     return productos.find((p) => p.id === id);
   };
 
-  // 👉 Escuchar los cambios de autenticación para garantizar la descarga
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const productIdStr = searchParams.get("product_id");
 
-    if (productIdStr) {
-      const productId = parseInt(productIdStr, 10);
-      if (isNaN(productId)) return;
-
-      console.log(
-        "Esperando la sesión actualizada para descargar producto ID:",
-        productId
-      );
-
-      // Usar el listener para esperar a que la sesión esté lista
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === "SIGNED_IN" && session) {
-          console.log("Sesión actualizada recibida, intentando descarga...");
-
-          // Ahora podemos buscar el producto
-          if (productos.length > 0) {
-            const product = findProductById(productId);
-            if (product) {
-              try {
-                await downloadFile(
-                  product.url_descarga_file,
-                  session,
-                  product.id,
-                  product.esGratis
-                );
-                console.log("¡Descarga exitosa!");
-                // Limpiar la URL después de una descarga exitosa
-                history.replaceState(null, "", location.pathname);
-              } catch (err) {
-                console.error("Error en la descarga final:", err);
-              }
-            }
-          }
-
-          // Una vez que el proceso ha terminado, podemos dejar de escuchar
-          subscription.unsubscribe();
-        }
-      });
-
-      // Limpiar el listener cuando el componente se desmonte
-      return () => {
-        subscription.unsubscribe();
-      };
+    // Si no hay un ID de producto en la URL o ya intentamos la descarga, no hacemos nada.
+    if (!productIdStr || downloadAttempted) {
+      return;
     }
-  }, [location.search, productos]); // Dependencias para reaccionar a la URL y a los productos
+
+    const productId = parseInt(productIdStr, 10);
+    if (isNaN(productId)) return;
+
+    // Solo creamos el listener si hay un producto a descargar y no lo hemos intentado
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Ejecutamos la lógica solo cuando el usuario está autenticado y no hemos intentado descargar
+      if (event === "SIGNED_IN" && session && !downloadAttempted) {
+        setDownloadAttempted(true); // 🚩 Marcamos la bandera para evitar futuras descargas
+
+        const product = findProductById(productId);
+        if (product) {
+          try {
+            await downloadFile(
+              product.url_descarga_file,
+              session,
+              product.id,
+              product.esGratis
+            );
+            console.log("¡Descarga exitosa!");
+            // Limpiar la URL después de una descarga exitosa
+            history.replaceState(null, "", location.pathname);
+          } catch (err) {
+            console.error("Error en la descarga final:", err);
+          }
+        }
+        // Dejamos de escuchar una vez que se ha resuelto el proceso
+        subscription.unsubscribe();
+      }
+    });
+
+    // Limpiar el listener al desmontar el componente
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [location.search, productos, downloadAttempted]);
 
   useEffect(() => {
     const fetchProducts = async () => {
