@@ -35,9 +35,9 @@ function ProductsSection() {
     return productos.find((p) => p.id === id);
   };
 
-  // 👉 Detectar redirección tras confirmar email
+  // 👉 Detectar redirección y manejar la descarga con reintentos
   useEffect(() => {
-    const handleRedirect = async () => {
+    const handleRedirectAndDownload = async () => {
       const { data: sessionData, error: sessionError } =
         await supabase.auth.getSession();
       if (sessionError) {
@@ -46,7 +46,6 @@ function ProductsSection() {
       }
       const session = sessionData?.session;
 
-      // 🔹 Usar query param "product_id" para descarga automática
       const searchParams = new URLSearchParams(location.search);
       const productIdStr = searchParams.get("product_id");
 
@@ -59,22 +58,40 @@ function ProductsSection() {
           productId
         );
 
-        // Espera a que los productos se hayan cargado antes de intentar la descarga
         if (productos.length > 0) {
           const product = findProductById(productId);
           if (product) {
-            try {
-              // Llama a la función de utilidad refactorizada
-              await downloadFile(
-                product.url_descarga_file,
-                session,
-                product.id,
-                product.esGratis
-              );
-              // Limpia el parámetro de la URL para evitar descargas repetidas
-              history.replaceState(null, "", location.pathname);
-            } catch (err: any) {
-              console.error("Error al iniciar descarga por redirección:", err);
+            const maxRetries = 3;
+            for (let i = 0; i < maxRetries; i++) {
+              try {
+                await downloadFile(
+                  product.url_descarga_file,
+                  session,
+                  product.id,
+                  product.esGratis
+                );
+                // Si la descarga es exitosa, salimos del bucle
+                history.replaceState(null, "", location.pathname);
+                break;
+              } catch (err: any) {
+                console.error(`Intento de descarga ${i + 1} fallido:`, err);
+                if (err.message.includes("Forbidden")) {
+                  // Si es un error de permisos, esperamos y reintentamos
+                  if (i < maxRetries - 1) {
+                    console.log("Esperando para reintentar...");
+                    await new Promise((resolve) => setTimeout(resolve, 2000)); // Esperar 2 segundos
+                  } else {
+                    // Si es el último intento y falla, lanzamos el error
+                    console.error("Máximo de reintentos alcanzado.");
+                    // Puedes lanzar un toast aquí
+                    break;
+                  }
+                } else {
+                  // Si no es un error de permisos, no reintentamos y salimos
+                  console.error("Error inesperado, cancelando reintentos.");
+                  break;
+                }
+              }
             }
           } else {
             console.error("Producto no encontrado para el ID:", productId);
@@ -82,8 +99,9 @@ function ProductsSection() {
         }
       }
     };
-    // El efecto se ejecutará cada vez que la ubicación cambie y los productos estén disponibles.
-    handleRedirect();
+
+    // El efecto se ejecutará cuando la ubicación cambie y los productos estén disponibles.
+    handleRedirectAndDownload();
   }, [location.search, productos]);
 
   useEffect(() => {
