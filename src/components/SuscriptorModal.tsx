@@ -20,7 +20,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   isOpen,
   onClose,
   initialEmail = "",
-  productId, // 👉 Recibe el ID del producto
+  productId,
   onSubscriptionSuccess,
 }) => {
   const [name, setName] = useState("");
@@ -29,17 +29,37 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   const [status, setStatus] = useState<"initial" | "loading">("initial");
   const [session, setSession] = useState<Session | null>(null);
 
-  // Escucha el evento de autenticación: cuando el usuario hace clic en el enlace del correo
+  // Escucha el evento de autenticación
   useEffect(() => {
     if (!isOpen) return;
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
         setSession(session);
         toast.success("¡Autenticación exitosa! Preparando descarga…");
-        onSubscriptionSuccess(session); // dispara la descarga segura
+
+        // 👉 Call the new Edge Function to update the verification status
+        try {
+          await fetch(
+            `${
+              import.meta.env.VITE_SUPABASE_URL
+            }/functions/v1/update-user-suscrito`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({ email: session.user.email }),
+            }
+          );
+        } catch (error) {
+          console.error("Error al actualizar estado de verificación:", error);
+        }
+
+        onSubscriptionSuccess(session);
         onClose();
       }
     });
@@ -52,19 +72,16 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
     setStatus("loading");
 
     try {
-      // 👉 Construye la URL de redirección con el ID del producto
       const redirectUrl = `${window.location.origin}/productos?product_id=${productId}`;
 
-      // Envía el magic link
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: redirectUrl, // Usa la URL robusta
+          emailRedirectTo: redirectUrl,
         },
       });
       if (error) throw error;
 
-      // Guarda/actualiza los datos del suscriptor
       const { error: upsertError } = await supabase
         .from("misleinspira_suscriptors")
         .upsert([{ name, email, phone }], { onConflict: "email" });
