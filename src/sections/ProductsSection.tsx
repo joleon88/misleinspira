@@ -34,34 +34,31 @@ function ProductsSection() {
     return productos.find((p) => p.id === id);
   };
 
-  // 👉 Detectar redirección y manejar la descarga con reintentos
+  // 👉 Escuchar los cambios de autenticación para garantizar la descarga
   useEffect(() => {
-    const handleRedirectAndDownload = async () => {
-      const { data: sessionData, error: sessionError } =
-        await supabase.auth.getSession();
-      if (sessionError) {
-        console.error("Error recuperando sesión:", sessionError.message);
-        return;
-      }
-      const session = sessionData?.session;
+    const searchParams = new URLSearchParams(location.search);
+    const productIdStr = searchParams.get("product_id");
 
-      const searchParams = new URLSearchParams(location.search);
-      const productIdStr = searchParams.get("product_id");
+    if (productIdStr) {
+      const productId = parseInt(productIdStr, 10);
+      if (isNaN(productId)) return;
 
-      if (session && productIdStr) {
-        const productId = parseInt(productIdStr, 10);
-        if (isNaN(productId)) return;
+      console.log(
+        "Esperando la sesión actualizada para descargar producto ID:",
+        productId
+      );
 
-        console.log(
-          "Usuario verificado tras redirección, buscando producto ID:",
-          productId
-        );
+      // Usar el listener para esperar a que la sesión esté lista
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          console.log("Sesión actualizada recibida, intentando descarga...");
 
-        if (productos.length > 0) {
-          const product = findProductById(productId);
-          if (product) {
-            const maxRetries = 3;
-            for (let i = 0; i < maxRetries; i++) {
+          // Ahora podemos buscar el producto
+          if (productos.length > 0) {
+            const product = findProductById(productId);
+            if (product) {
               try {
                 await downloadFile(
                   product.url_descarga_file,
@@ -69,38 +66,26 @@ function ProductsSection() {
                   product.id,
                   product.esGratis
                 );
-                // Si la descarga es exitosa, salimos del bucle y limpiamos la URL
+                console.log("¡Descarga exitosa!");
+                // Limpiar la URL después de una descarga exitosa
                 history.replaceState(null, "", location.pathname);
-                break;
-              } catch (err: any) {
-                console.error(`Intento de descarga ${i + 1} fallido:`, err);
-                // 💡 CAMBIO: Ahora buscamos el mensaje específico de tu función de utilidad
-                if (
-                  err.message.includes("Hubo un error al descargar el archivo")
-                ) {
-                  if (i < maxRetries - 1) {
-                    console.log("Esperando para reintentar...");
-                    await new Promise((resolve) => setTimeout(resolve, 2000)); // Esperar 2 segundos
-                  } else {
-                    console.error("Máximo de reintentos alcanzado.");
-                    break;
-                  }
-                } else {
-                  // Si no es un error de permisos, no reintentamos y salimos
-                  console.error("Error inesperado, cancelando reintentos.");
-                  break;
-                }
+              } catch (err) {
+                console.error("Error en la descarga final:", err);
               }
             }
-          } else {
-            console.error("Producto no encontrado para el ID:", productId);
           }
-        }
-      }
-    };
 
-    handleRedirectAndDownload();
-  }, [location.search, productos]);
+          // Una vez que el proceso ha terminado, podemos dejar de escuchar
+          subscription.unsubscribe();
+        }
+      });
+
+      // Limpiar el listener cuando el componente se desmonte
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [location.search, productos]); // Dependencias para reaccionar a la URL y a los productos
 
   useEffect(() => {
     const fetchProducts = async () => {
