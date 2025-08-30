@@ -30,7 +30,6 @@ function ProductsSection() {
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
 
-  // Función para encontrar un producto por ID
   const findProductById = (id: number) => {
     return productos.find((p) => p.id === id);
   };
@@ -70,20 +69,20 @@ function ProductsSection() {
                   product.id,
                   product.esGratis
                 );
-                // Si la descarga es exitosa, salimos del bucle
+                // Si la descarga es exitosa, salimos del bucle y limpiamos la URL
                 history.replaceState(null, "", location.pathname);
                 break;
               } catch (err: any) {
                 console.error(`Intento de descarga ${i + 1} fallido:`, err);
-                if (err.message.includes("Forbidden")) {
-                  // Si es un error de permisos, esperamos y reintentamos
+                // 💡 CAMBIO: Ahora buscamos el mensaje específico de tu función de utilidad
+                if (
+                  err.message.includes("Hubo un error al descargar el archivo")
+                ) {
                   if (i < maxRetries - 1) {
                     console.log("Esperando para reintentar...");
                     await new Promise((resolve) => setTimeout(resolve, 2000)); // Esperar 2 segundos
                   } else {
-                    // Si es el último intento y falla, lanzamos el error
                     console.error("Máximo de reintentos alcanzado.");
-                    // Puedes lanzar un toast aquí
                     break;
                   }
                 } else {
@@ -100,7 +99,6 @@ function ProductsSection() {
       }
     };
 
-    // El efecto se ejecutará cuando la ubicación cambie y los productos estén disponibles.
     handleRedirectAndDownload();
   }, [location.search, productos]);
 
