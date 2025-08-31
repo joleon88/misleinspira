@@ -11,6 +11,14 @@ export async function downloadFile(
   esGratis = false
 ) {
   try {
+    // Verificación clave: Asegurarse de que la sesión sea válida
+    if (!session || !session.access_token) {
+      console.error("Error: No se encontró una sesión de usuario válida.");
+      throw new Error(
+        "No estás autenticado. Por favor, inicia sesión de nuevo."
+      );
+    }
+
     if (esGratis) {
       console.log(`Descargando archivo gratis: ${path}`);
       const { data, error } = await supabase.storage
@@ -25,7 +33,6 @@ export async function downloadFile(
       const a = document.createElement("a");
       a.href = url;
 
-      // La corrección: Asegura que el nombre del archivo no sea 'undefined'.
       const fileName = path.split("/").pop();
       a.download = fileName ?? "download-file.zip";
 
@@ -41,11 +48,9 @@ export async function downloadFile(
         error: signedUrlError,
       } = await supabase.functions.invoke("create-signed-url", {
         body: {
-          // --- ESTO ES LO QUE FALTABA ---
           filePath: path,
           productoId,
           esGratis,
-          // -------------------------------
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
