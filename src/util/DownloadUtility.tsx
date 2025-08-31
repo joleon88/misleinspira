@@ -8,7 +8,7 @@ export async function downloadFile(
   path: string,
   session: Session,
   productoId: number,
-  esGratis = false
+  esGratis?: boolean
 ) {
   try {
     // Verificación clave: Asegurarse de que la sesión sea válida
