@@ -29,125 +29,144 @@ function ProductsSection() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [hasDownloaded, setHasDownloaded] = useState(false);
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    // Este efecto solo se encarga de cargar la lista completa de productos.
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from("misleinspira_products")
-          .select("*")
-          .order("creado_en", { ascending: false });
-
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          setProductos(data as Produts[]);
-        }
-      } catch (err: any) {
-        console.error("Error fetching products:", err.message);
-        setError(
-          "No se pudieron cargar los productos. Por favor, inténtalo de nuevo."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const productIdStr = searchParams.get("product_id");
-
-    // Si ya se intentó una descarga o no hay un ID de producto, salimos
-    if (hasDownloaded || !productIdStr) {
-      return;
-    }
-
-    const productId = parseInt(productIdStr, 10);
-    if (isNaN(productId)) return;
-
-    console.log(
-      "¡Redirección detectada! Escuchando el evento de autenticación para el ID del producto:",
-      productId
-    );
-
+    // Escucha el evento de autenticación una sola vez para determinar el estado inicial.
+    // Esto es crucial para asegurar que la sesión de Supabase esté lista.
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session && !hasDownloaded) {
-        setHasDownloaded(true); // Bloqueamos futuras ejecuciones
-
-        console.log(
-          "Sesión actualizada recibida, actualizando base de datos y preparando la descarga..."
-        );
-
-        try {
-          // 1. Llama a la Edge Function para actualizar el estado del usuario
-          const response = await fetch(
-            `${
-              import.meta.env.VITE_SUPABASE_URL
-            }/functions/v1/update-user-suscrito`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session.access_token}`,
-              },
-              body: JSON.stringify({ email: session.user.email }),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(
-              "Error al actualizar estado de verificación del usuario."
-            );
-          }
-
-          console.log("Estado de suscripción actualizado con éxito.");
-
-          // 2. ✅ ¡NUEVO! Obtenemos el producto directamente para evitar la condición de carrera
-          const { data: product, error: productError } = await supabase
-            .from("misleinspira_products")
-            .select("*")
-            .eq("id", productId)
-            .single();
-
-          if (productError || !product) {
-            throw new Error("Producto no encontrado.");
-          }
-
-          // 3. Procede con la descarga
-          await downloadFile(
-            product.url_descarga_file,
-            session,
-            product.id,
-            product.esGratis
-          );
-          console.log("¡Descarga exitosa!");
-          history.replaceState(null, "", location.pathname);
-        } catch (err) {
-          console.error(
-            "Error en la descarga final o en la actualización del usuario:",
-            err
-          );
-        } finally {
-          subscription.unsubscribe();
-        }
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (
+        event === "SIGNED_IN" ||
+        event === "SIGNED_OUT" ||
+        event === "INITIAL_SESSION"
+      ) {
+        setIsAuthReady(true);
+        subscription.unsubscribe();
       }
     });
 
     return () => {
-      if (subscription) {
-        subscription.unsubscribe();
+      subscription?.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthReady) {
+      // Espera hasta que la autenticación inicial esté lista para evitar la condición de carrera
+      return;
+    }
+
+    const searchParams = new URLSearchParams(location.search);
+    const productIdStr = searchParams.get("product_id");
+
+    const handleDownloadAndProducts = async () => {
+      setLoading(true);
+      if (productIdStr && !hasDownloaded) {
+        // 1. Lógica de descarga: si hay un product_id, nos enfocamos en descargar
+        const productId = parseInt(productIdStr, 10);
+        if (isNaN(productId)) {
+          setLoading(false);
+          return;
+        }
+
+        console.log(
+          "¡Redirección detectada! Preparando la descarga para el ID del producto:",
+          productId
+        );
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session) {
+          try {
+            // Asegurarse de que no se descargue dos veces
+            setHasDownloaded(true);
+
+            // Actualizar estado del usuario
+            const response = await fetch(
+              `${
+                import.meta.env.VITE_SUPABASE_URL
+              }/functions/v1/update-user-suscrito`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({ email: session.user.email }),
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error(
+                "Error al actualizar estado de verificación del usuario."
+              );
+            }
+            console.log("Estado de suscripción actualizado con éxito.");
+
+            // Obtener el producto para descargar
+            const { data: product, error: productError } = await supabase
+              .from("misleinspira_products")
+              .select("*")
+              .eq("id", productId)
+              .single();
+
+            if (productError || !product) {
+              throw new Error("Producto no encontrado.");
+            }
+
+            // Proceder con la descarga
+            await downloadFile(
+              product.url_descarga_file,
+              session,
+              product.id,
+              product.esGratis
+            );
+            console.log("¡Descarga exitosa!");
+            history.replaceState(null, "", location.pathname);
+          } catch (err) {
+            console.error(
+              "Error en la descarga final o en la actualización del usuario:",
+              err
+            );
+            setError(
+              "Hubo un error al descargar el archivo. Por favor, inténtalo de nuevo."
+            );
+          } finally {
+            setLoading(false);
+          }
+        }
+      } else {
+        // 2. Lógica de carga: si no hay product_id, cargamos todos los productos
+        try {
+          const { data, error } = await supabase
+            .from("misleinspira_products")
+            .select("*")
+            .order("creado_en", { ascending: false });
+
+          if (error) {
+            throw error;
+          }
+
+          if (data) {
+            setProductos(data as Produts[]);
+          }
+        } catch (err) {
+          console.error("Error fetching products:", err);
+          setError(
+            "No se pudieron cargar los productos. Por favor, inténtalo de nuevo."
+          );
+        } finally {
+          setLoading(false);
+        }
       }
     };
-  }, [location.search, hasDownloaded]);
+
+    handleDownloadAndProducts();
+  }, [isAuthReady, location.search, hasDownloaded]);
 
   return (
     <section id="productos" className="container mx-auto py-24 px-4">
