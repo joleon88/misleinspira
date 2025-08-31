@@ -41,7 +41,11 @@ export async function downloadFile(
         error: signedUrlError,
       } = await supabase.functions.invoke("create-signed-url", {
         body: {
+          // --- ESTO ES LO QUE FALTABA ---
+          filePath: path,
           productoId,
+          esGratis,
+          // -------------------------------
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
