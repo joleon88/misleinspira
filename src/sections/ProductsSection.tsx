@@ -28,91 +28,97 @@ function ProductsSection() {
   const [productos, setProductos] = useState<Produts[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasDownloaded, setHasDownloaded] = useState(false); // ✅ Nueva bandera de estado
   const location = useLocation();
 
   const findProductById = (id: number) => {
     return productos.find((p) => p.id === id);
   };
 
-  // ✅ Nueva lógica centralizada en ProductsSection
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const productIdStr = searchParams.get("product_id");
 
-    if (productIdStr) {
-      const productId = parseInt(productIdStr, 10);
-      if (isNaN(productId)) return;
+    // Si ya se intentó una descarga o no hay un ID de producto, salimos
+    if (hasDownloaded || !productIdStr) {
+      return;
+    }
 
-      console.log(
-        "¡Redirección detectada! Escuchando el evento de autenticación para el ID del producto:",
-        productId
-      );
+    const productId = parseInt(productIdStr, 10);
+    if (isNaN(productId)) return;
 
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === "SIGNED_IN" && session) {
-          console.log(
-            "Sesión actualizada recibida, actualizando base de datos y preparando la descarga..."
+    console.log(
+      "¡Redirección detectada! Escuchando el evento de autenticación para el ID del producto:",
+      productId
+    );
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Usamos el estado local para asegurar que la lógica solo se ejecute una vez
+      if (event === "SIGNED_IN" && session && !hasDownloaded) {
+        setHasDownloaded(true); // Bloqueamos futuras ejecuciones
+
+        console.log(
+          "Sesión actualizada recibida, actualizando base de datos y preparando la descarga..."
+        );
+
+        try {
+          // 1. Llama a la Edge Function para actualizar el estado del usuario en la base de datos
+          const response = await fetch(
+            `${
+              import.meta.env.VITE_SUPABASE_URL
+            }/functions/v1/update-user-suscrito`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({ email: session.user.email }),
+            }
           );
 
-          try {
-            // 1. Llama a la Edge Function para actualizar el estado del usuario en la base de datos
-            const response = await fetch(
-              `${
-                import.meta.env.VITE_SUPABASE_URL
-              }/functions/v1/update-user-suscrito`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${session.access_token}`,
-                },
-                body: JSON.stringify({ email: session.user.email }),
-              }
+          if (!response.ok) {
+            throw new Error(
+              "Error al actualizar estado de verificación del usuario."
             );
-
-            if (!response.ok) {
-              throw new Error(
-                "Error al actualizar estado de verificación del usuario."
-              );
-            }
-
-            console.log("Estado de suscripción actualizado con éxito.");
-
-            // 2. Procede con la descarga solo si la actualización fue exitosa
-            const product = findProductById(productId);
-            if (product) {
-              await downloadFile(
-                product.url_descarga_file,
-                session,
-                product.id,
-                product.esGratis
-              );
-              console.log("¡Descarga exitosa!");
-              // Limpiar la URL después de una descarga exitosa
-              history.replaceState(null, "", location.pathname);
-            }
-          } catch (err) {
-            console.error(
-              "Error en la descarga final o en la actualización del usuario:",
-              err
-            );
-          } finally {
-            // Dejamos de escuchar una vez que el proceso ha terminado
-            subscription.unsubscribe();
           }
-        }
-      });
 
-      // Limpiar el listener al desmontar el componente
-      return () => {
-        if (subscription) {
+          console.log("Estado de suscripción actualizado con éxito.");
+
+          // 2. Procede con la descarga solo si la actualización fue exitosa
+          const product = findProductById(productId);
+          if (product) {
+            await downloadFile(
+              product.url_descarga_file,
+              session,
+              product.id,
+              product.esGratis
+            );
+            console.log("¡Descarga exitosa!");
+            // Limpiar la URL después de una descarga exitosa
+            history.replaceState(null, "", location.pathname);
+          }
+        } catch (err) {
+          console.error(
+            "Error en la descarga final o en la actualización del usuario:",
+            err
+          );
+        } finally {
+          // Dejamos de escuchar una vez que el proceso ha terminado
           subscription.unsubscribe();
         }
-      };
-    }
-  }, [location.search, productos]);
+      }
+    });
+
+    // Limpiar el listener al desmontar el componente
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
+  }, [location.search, productos, hasDownloaded]);
 
   useEffect(() => {
     const fetchProducts = async () => {
