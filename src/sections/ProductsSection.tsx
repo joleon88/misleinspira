@@ -28,59 +28,91 @@ function ProductsSection() {
   const [productos, setProductos] = useState<Produts[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [downloadAttempted, setDownloadAttempted] = useState(false); // 🚩 Nueva bandera de estado
   const location = useLocation();
 
   const findProductById = (id: number) => {
     return productos.find((p) => p.id === id);
   };
 
+  // ✅ Nueva lógica centralizada en ProductsSection
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const productIdStr = searchParams.get("product_id");
 
-    // Si no hay un ID de producto en la URL o ya intentamos la descarga, no hacemos nada.
-    if (!productIdStr || downloadAttempted) {
-      return;
-    }
+    if (productIdStr) {
+      const productId = parseInt(productIdStr, 10);
+      if (isNaN(productId)) return;
 
-    const productId = parseInt(productIdStr, 10);
-    if (isNaN(productId)) return;
+      console.log(
+        "¡Redirección detectada! Escuchando el evento de autenticación para el ID del producto:",
+        productId
+      );
 
-    // Solo creamos el listener si hay un producto a descargar y no lo hemos intentado
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Ejecutamos la lógica solo cuando el usuario está autenticado y no hemos intentado descargar
-      if (event === "SIGNED_IN" && session && !downloadAttempted) {
-        setDownloadAttempted(true); // 🚩 Marcamos la bandera para evitar futuras descargas
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          console.log(
+            "Sesión actualizada recibida, actualizando base de datos y preparando la descarga..."
+          );
 
-        const product = findProductById(productId);
-        if (product) {
           try {
-            await downloadFile(
-              product.url_descarga_file,
-              session,
-              product.id,
-              product.esGratis
+            // 1. Llama a la Edge Function para actualizar el estado del usuario en la base de datos
+            const response = await fetch(
+              `${
+                import.meta.env.VITE_SUPABASE_URL
+              }/functions/v1/update-user-suscrito`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({ email: session.user.email }),
+              }
             );
-            console.log("¡Descarga exitosa!");
-            // Limpiar la URL después de una descarga exitosa
-            history.replaceState(null, "", location.pathname);
+
+            if (!response.ok) {
+              throw new Error(
+                "Error al actualizar estado de verificación del usuario."
+              );
+            }
+
+            console.log("Estado de suscripción actualizado con éxito.");
+
+            // 2. Procede con la descarga solo si la actualización fue exitosa
+            const product = findProductById(productId);
+            if (product) {
+              await downloadFile(
+                product.url_descarga_file,
+                session,
+                product.id,
+                product.esGratis
+              );
+              console.log("¡Descarga exitosa!");
+              // Limpiar la URL después de una descarga exitosa
+              history.replaceState(null, "", location.pathname);
+            }
           } catch (err) {
-            console.error("Error en la descarga final:", err);
+            console.error(
+              "Error en la descarga final o en la actualización del usuario:",
+              err
+            );
+          } finally {
+            // Dejamos de escuchar una vez que el proceso ha terminado
+            subscription.unsubscribe();
           }
         }
-        // Dejamos de escuchar una vez que se ha resuelto el proceso
-        subscription.unsubscribe();
-      }
-    });
+      });
 
-    // Limpiar el listener al desmontar el componente
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [location.search, productos, downloadAttempted]);
+      // Limpiar el listener al desmontar el componente
+      return () => {
+        if (subscription) {
+          subscription.unsubscribe();
+        }
+      };
+    }
+  }, [location.search, productos]);
 
   useEffect(() => {
     const fetchProducts = async () => {

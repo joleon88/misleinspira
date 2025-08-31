@@ -12,7 +12,7 @@ interface SubscriberModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialEmail?: string;
-  productId: number; // 👉 Nueva propiedad para el ID del producto
+  productId: number;
   onSubscriptionSuccess: (session: Session) => void;
 }
 
@@ -29,37 +29,23 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   const [status, setStatus] = useState<"initial" | "loading">("initial");
   const [session, setSession] = useState<Session | null>(null);
 
-  // Escucha el evento de autenticación
+  /**
+   * ✅ Lógica de escucha de sesión movida a ProductSection.
+   * Este listener solo se encarga de detectar si el usuario inició sesión
+   * y llamar a la función onSubscriptionSuccess del componente padre (ProductsCard).
+   */
   useEffect(() => {
     if (!isOpen) return;
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session) {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      // El modal solo necesita saber si el usuario se autenticó exitosamente
+      if (session) {
         setSession(session);
-        toast.success("¡Autenticación exitosa! Preparando descarga…");
-
-        // 👉 Call the new Edge Function to update the verification status
-        try {
-          await fetch(
-            `${
-              import.meta.env.VITE_SUPABASE_URL
-            }/functions/v1/update-user-suscrito`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session.access_token}`,
-              },
-              body: JSON.stringify({ email: session.user.email }),
-            }
-          );
-        } catch (error) {
-          console.error("Error al actualizar estado de verificación:", error);
-        }
-
+        // Llama a la función del padre para iniciar la descarga,
+        // la cual se encargará de la lógica de negocio en ProductsSection
         onSubscriptionSuccess(session);
+        // Cierra el modal, el resto del flujo se maneja en el componente padre
         onClose();
       }
     });
