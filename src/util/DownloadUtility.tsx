@@ -1,57 +1,71 @@
-import { type Session } from "@supabase/supabase-js";
+import { createClient, type Session } from "@supabase/supabase-js";
 
-/**
- * Llama a la Edge Function para generar una URL de descarga firmada
- * y luego inicia la descarga del archivo.
- * @param urlDescarga - La ruta del archivo en el bucket de Supabase Storage.
- * @param session - El objeto de sesión de Supabase del usuario.
- * @param productoId - El ID del producto que se va a descargar.
- * @param esGratis - Un booleano que indica si el producto es gratis.
- * @returns true si la descarga fue exitosa, de lo contrario lanza un error.
- */
-export const downloadFile = async (
-  urlDescarga: string,
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export async function downloadFile(
+  path: string,
   session: Session,
   productoId: number,
-  esGratis: boolean
-): Promise<boolean> => {
+  esGratis = false
+) {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-signed-url`,
-      {
-        method: "POST",
+    if (esGratis) {
+      console.log(`Descargando archivo gratis: ${path}`);
+      const { data, error } = await supabase.storage
+        .from("content-files")
+        .download(path);
+
+      if (error) {
+        throw new Error(`Error al descargar el archivo: ${error.message}`);
+      }
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+
+      // La corrección: Asegura que el nombre del archivo no sea 'undefined'.
+      const fileName = path.split("/").pop();
+      a.download = fileName ?? "download-file.zip";
+
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } else {
+      console.log(`Solicitando URL firmada para el producto ID: ${productoId}`);
+
+      const {
+        data: { signedUrl },
+        error: signedUrlError,
+      } = await supabase.functions.invoke("create-signed-url", {
+        body: {
+          productoId,
+        },
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ filePath: urlDescarga, productoId, esGratis }),
+      });
+
+      if (signedUrlError) {
+        throw new Error(
+          `Error al obtener la URL firmada: ${signedUrlError.message}`
+        );
       }
-    );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Error: ${response.status}`);
+      console.log("URL firmada obtenida, iniciando descarga:", signedUrl);
+
+      const link = document.createElement("a");
+      link.href = signedUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
-
-    const { signedUrl } = await response.json();
-    if (!signedUrl) {
-      throw new Error("No se generó URL firmada.");
-    }
-
-    const link = document.createElement("a");
-    link.href = signedUrl;
-    // Extrae el nombre del archivo de la URL para la descarga
-    link.download = urlDescarga.split("/").pop() || "producto";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    console.log("¡Descarga iniciada exitosamente!");
-    return true;
-  } catch (error: any) {
-    console.error("Error al descargar:", error.message);
+  } catch (err) {
+    console.error("Error al descargar:", err);
     throw new Error(
       "Hubo un error al descargar el archivo. Por favor, inténtalo de nuevo."
     );
   }
-};
+}
