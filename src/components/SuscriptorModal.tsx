@@ -28,24 +28,17 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"initial" | "loading">("initial");
   const [session, setSession] = useState<Session | null>(null);
+  const [isEmailSent, setIsEmailSent] = useState(false);
+  const [isExistingUser, setIsExistingUser] = useState(false);
 
-  /**
-   * ✅ Lógica de escucha de sesión movida a ProductSection.
-   * Este listener solo se encarga de detectar si el usuario inició sesión
-   * y llamar a la función onSubscriptionSuccess del componente padre (ProductsCard).
-   */
   useEffect(() => {
     if (!isOpen) return;
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      // El modal solo necesita saber si el usuario se autenticó exitosamente
       if (session) {
         setSession(session);
-        // Llama a la función del padre para iniciar la descarga,
-        // la cual se encargará de la lógica de negocio en ProductsSection
         onSubscriptionSuccess(session);
-        // Cierra el modal, el resto del flujo se maneja en el componente padre
         onClose();
       }
     });
@@ -60,26 +53,49 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
     try {
       const redirectUrl = `${window.location.origin}/productos?product_id=${productId}`;
 
-      const { error } = await supabase.auth.signInWithOtp({
+      const { data: existingSubscriber, error: searchError } = await supabase
+        .from("misleinspira_suscriptors")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (searchError) {
+        console.error("Error al buscar suscriptor:", searchError.message);
+      }
+
+      const isExisting = existingSubscriber !== null;
+      setIsExistingUser(isExisting);
+
+      if (!isExisting) {
+        const { error: upsertError } = await supabase
+          .from("misleinspira_suscriptors")
+          .upsert([{ name, email, phone }], { onConflict: "email" });
+        if (upsertError) {
+          console.error("Error al guardar suscriptor:", upsertError.message);
+        }
+      }
+
+      const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: redirectUrl,
         },
       });
-      if (error) throw error;
 
-      const { error: upsertError } = await supabase
-        .from("misleinspira_suscriptors")
-        .upsert([{ name, email, phone }], { onConflict: "email" });
+      if (otpError) throw otpError;
 
-      if (upsertError) {
-        console.error("Error al guardar suscriptor:", upsertError.message);
+      if (isExisting) {
+        toast.success("Enlace enviado.");
+      } else {
+        toast.success("¡Te has suscrito!");
       }
 
-      toast.success("Revisa tu correo para verificar tu email");
+      setIsEmailSent(true);
     } catch (err: any) {
       console.error(err);
-      toast.error("No se pudo enviar el correo. Intenta nuevamente.");
+      toast.error(
+        "Hubo un error al enviar el correo. Por favor, intenta de nuevo."
+      );
     } finally {
       setStatus("initial");
     }
@@ -89,13 +105,15 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[1050] flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-[1050] flex items-center justify-center p-4"
       onClick={onClose}
+      style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
       <Toaster position="bottom-center" />
       <div
-        className="bg-white rounded-3xl w-full max-w-lg p-8 relative"
+        className="rounded-3xl w-full max-w-lg p-8 relative"
         onClick={(e) => e.stopPropagation()}
+        style={{ backgroundColor: "#f5efe6" }}
       >
         <button
           className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"
@@ -103,10 +121,11 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
           onClick={onClose}
         >
           <svg
-            className="w-6 h-6 text-gray-500"
+            className="w-6 h-6"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
+            style={{ color: "#5a5a5a" }}
           >
             <path
               strokeLinecap="round"
@@ -119,13 +138,51 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
 
         {session ? (
           <div className="flex flex-col items-center gap-3 text-center">
-            <CheckCircle className="w-10 h-10" />
-            <h2 className="text-xl font-semibold">¡Autenticación exitosa!</h2>
-            <p>La descarga se iniciará en un momento…</p>
+            <CheckCircle className="w-10 h-10" style={{ color: "#b7d9c9" }} />
+            <h2
+              className="text-xl font-semibold"
+              style={{ color: "#4a4a4a", fontFamily: "Montserrat, sans-serif" }}
+            >
+              ¡Autenticación exitosa!
+            </h2>
+            <p style={{ color: "#5a5a5a", fontFamily: "Poppins, sans-serif" }}>
+              La descarga se iniciará en un momento…
+            </p>
+          </div>
+        ) : isEmailSent ? (
+          <div className="flex flex-col items-center gap-6 text-center">
+            <CheckCircle className="w-16 h-16" style={{ color: "#b7d9c9" }} />
+            <h2
+              className="text-3xl font-bold"
+              style={{ color: "#4a4a4a", fontFamily: "Montserrat, sans-serif" }}
+            >
+              ¡Revisa tu correo!
+            </h2>
+            <p
+              className="text-lg"
+              style={{ color: "#5a5a5a", fontFamily: "Poppins, sans-serif" }}
+            >
+              {isExistingUser
+                ? "Ya eres parte de la comunidad. Te hemos enviado un enlace a "
+                : "¡Gracias por unirte a nuestra comunidad! Para completar la suscripción y acceder al producto, por favor, haz clic en el enlace de verificación que te hemos enviado a "}
+              <span className="font-semibold" style={{ color: "#f8c8dc" }}>
+                {email}
+              </span>
+              .
+            </p>
+            <p
+              className="text-sm"
+              style={{ color: "#5a5a5a", fontFamily: "Poppins, sans-serif" }}
+            >
+              Si no encuentras el correo, por favor revisa tu carpeta de spam.
+            </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <h2 className="text-2xl font-bold text-center">
+            <h2
+              className="text-2xl font-bold text-center"
+              style={{ color: "#4a4a4a", fontFamily: "Montserrat, sans-serif" }}
+            >
               Únete a la comunidad
             </h2>
 
@@ -133,6 +190,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
               <User
                 className="absolute left-3 top-1/2 -translate-y-1/2"
                 size={20}
+                style={{ color: "#5a5a5a" }}
               />
               <input
                 type="text"
@@ -140,7 +198,12 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full pl-11 pr-4 py-3 border rounded-xl"
+                className="w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#ddd",
+                  fontFamily: "Poppins, sans-serif",
+                  color: "#4a4a4a",
+                }}
               />
             </div>
 
@@ -148,6 +211,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
               <Mail
                 className="absolute left-3 top-1/2 -translate-y-1/2"
                 size={20}
+                style={{ color: "#5a5a5a" }}
               />
               <input
                 type="email"
@@ -156,9 +220,14 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 readOnly={initialEmail !== ""}
-                className={`w-full pl-11 pr-4 py-3 border rounded-xl ${
+                className={`w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 ${
                   initialEmail !== "" ? "bg-gray-100 cursor-not-allowed" : ""
                 }`}
+                style={{
+                  borderColor: "#ddd",
+                  fontFamily: "Poppins, sans-serif",
+                  color: "#4a4a4a",
+                }}
               />
             </div>
 
@@ -166,23 +235,39 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
               <Phone
                 className="absolute left-3 top-1/2 -translate-y-1/2"
                 size={20}
+                style={{ color: "#5a5a5a" }}
               />
               <input
                 type="tel"
                 placeholder="Número de teléfono (opcional)"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 border rounded-xl"
+                className="w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#ddd",
+                  fontFamily: "Poppins, sans-serif",
+                  color: "#4a4a4a",
+                }}
               />
             </div>
 
             <button
               type="submit"
               disabled={status === "loading"}
-              className="w-full font-bold py-3 rounded-full bg-pink-300 text-white flex items-center justify-center gap-2"
+              className="w-full font-bold py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 ease-in-out disabled:opacity-75"
+              style={{
+                backgroundColor: "#f8c8dc",
+                color: "#4a4a4a",
+                boxShadow: "0 4px 6px rgba(248, 200, 220, 0.4)",
+                fontFamily: "Montserrat, sans-serif",
+              }}
             >
               {status === "loading" && (
-                <Loader2 className="animate-spin" size={20} />
+                <Loader2
+                  className="animate-spin"
+                  size={20}
+                  style={{ color: "#4a4a4a" }}
+                />
               )}
               <span>{status === "loading" ? "Enviando…" : "Suscribirse"}</span>
             </button>
