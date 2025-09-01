@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { createClient, type Session } from "@supabase/supabase-js";
 import toast, { Toaster } from "react-hot-toast";
 import { Mail, User, Phone, Loader2, CheckCircle } from "lucide-react";
+import { createPortal } from "react-dom";
+import OutlinedButton from "./OutLinedButton";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL!,
@@ -103,7 +105,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[1050] flex items-center justify-center p-4"
       onClick={onClose}
@@ -180,7 +182,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2
-              className="text-2xl font-bold text-center"
+              className="!text-2xl md:text-3xl font-bold text-center mt-2"
               style={{ color: "#4a4a4a", fontFamily: "Montserrat, sans-serif" }}
             >
               Únete a la comunidad
@@ -198,7 +200,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2"
+                className="w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:[border-color:var(--color-rosa-pastel)] focus:ring-[var(--color-rosa-pastel)]"
                 style={{
                   borderColor: "#ddd",
                   fontFamily: "Poppins, sans-serif",
@@ -220,7 +222,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 readOnly={initialEmail !== ""}
-                className={`w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 ${
+                className={`w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:[border-color:var(--color-rosa-pastel)] focus:ring-[var(--color-rosa-pastel)] ${
                   initialEmail !== "" ? "bg-gray-100 cursor-not-allowed" : ""
                 }`}
                 style={{
@@ -242,7 +244,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
                 placeholder="Número de teléfono (opcional)"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2"
+                className="w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:[border-color:var(--color-rosa-pastel)] focus:ring-[var(--color-rosa-pastel)]"
                 style={{
                   borderColor: "#ddd",
                   fontFamily: "Poppins, sans-serif",
@@ -251,30 +253,29 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={status === "loading"}
-              className="w-full font-bold py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 ease-in-out disabled:opacity-75"
-              style={{
-                backgroundColor: "#f8c8dc",
-                color: "#4a4a4a",
-                boxShadow: "0 4px 6px rgba(248, 200, 220, 0.4)",
-                fontFamily: "Montserrat, sans-serif",
-              }}
-            >
-              {status === "loading" && (
-                <Loader2
-                  className="animate-spin"
-                  size={20}
-                  style={{ color: "#4a4a4a" }}
-                />
-              )}
-              <span>{status === "loading" ? "Enviando…" : "Suscribirse"}</span>
-            </button>
+            <div className="flex items-center justify-center">
+              <OutlinedButton
+                className="w-full mt-2 py-1"
+                type="submit"
+                disabled={status === "loading"}
+              >
+                {status === "loading" && (
+                  <Loader2
+                    className="animate-spin"
+                    size={20}
+                    style={{ color: "#4a4a4a" }}
+                  />
+                )}
+                <span>
+                  {status === "loading" ? "Enviando…" : "Suscribirse"}
+                </span>
+              </OutlinedButton>
+            </div>
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

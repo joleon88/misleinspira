@@ -17,7 +17,7 @@ function ContactPage() {
           Estoy aquí para escucharte y ayudarte a dar el siguiente paso en tu
           camino.
         </p>
-        <div className="contact-form-container max-w-3xl mx-auto [background-color:var(--color-blanco)] p-12 rounded-xl shadow-xl text-left">
+        <div className="contact-form-container max-w-2xl mx-auto [background-color:var(--color-blanco)] p-12 rounded-xl shadow-xl text-left">
           <form action="#" method="POST">
             <div className="mb-6">
               <label
@@ -32,7 +32,7 @@ function ContactPage() {
                 name="name"
                 placeholder="Tu nombre y apellido"
                 required
-                className="w-full p-3 border [border-color:var(--color-borde-claro)] rounded-md [font-family:var(--font-montserrat)] text-lg [background-color:var(--color-beige-lino)] focus:[border-color:var(--color-rosa-pastel)] focus:ring-4 focus:ring-[var(--color-rosa-pastel)] focus:ring-opacity-50 outline-none transition-all duration-300"
+                className="w-full p-3 border [border-color:var(--color-borde-claro)] rounded-md [font-family:var(--font-montserrat)] text-lg focus:[border-color:var(--color-rosa-pastel)] focus:ring-2 focus:ring-[var(--color-rosa-pastel)] focus:ring-opacity-50 outline-none transition-all duration-300"
               />
             </div>
             <div className="mb-6">
@@ -48,7 +48,7 @@ function ContactPage() {
                 name="email"
                 placeholder="tu.email@ejemplo.com"
                 required
-                className="w-full p-3 border [border-color:var(--color-borde-claro)] rounded-md [font-family:var(--font-montserrat)] text-lg [background-color:var(--color-beige-lino)] focus:[border-color:var(--color-rosa-pastel)] focus:ring-4 focus:ring-[var(--color-rosa-pastel)] focus:ring-opacity-50 outline-none transition-all duration-300"
+                className="w-full p-3 border [border-color:var(--color-borde-claro)] rounded-md [font-family:var(--font-montserrat)] text-lg focus:[border-color:var(--color-rosa-pastel)] focus:ring-2 focus:ring-[var(--color-rosa-pastel)] focus:ring-opacity-50 outline-none transition-all duration-300"
               />
             </div>
             <div className="mb-8">
@@ -63,11 +63,11 @@ function ContactPage() {
                 name="message"
                 placeholder="Cuéntame sobre tus inquietudes o lo que buscas..."
                 required
-                className="w-full p-3 border [border-color:var(--color-borde-claro)] rounded-md [font-family:var(--font-montserrat)] text-lg [background-color:var(--color-beige-lino)] min-h-[150px] resize-y focus:[border-color:var(--color-rosa-pastel)] focus:ring-4 focus:ring-[var(--color-rosa-pastel)] focus:ring-opacity-50 outline-none transition-all duration-300"
+                className="w-full p-3 border [border-color:var(--color-borde-claro)] rounded-md [font-family:var(--font-montserrat)] text-lg min-h-[150px] resize-y focus:[border-color:var(--color-rosa-pastel)] focus:ring-2 focus:ring-[var(--color-rosa-pastel)] focus:ring-opacity-50 outline-none transition-all duration-300"
               ></textarea>
             </div>
             <div className="flex items-center justify-center">
-              <OutlinedButton className="mt-2 py-1" type="submit">
+              <OutlinedButton className="w-full mt-2 py-1" type="submit">
                 Enviar Mensaje
               </OutlinedButton>
             </div>

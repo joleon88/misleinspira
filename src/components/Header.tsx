@@ -54,18 +54,18 @@ function Header() {
             <li>
               <Link
                 to="/inicio"
-                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left
-                  before:content-[''] before:absolute before:inset-[-6px_-14px] before:rounded-full before:bg-transparent before:border before:border-[2.5px] before:border-[var(--color-rosa-pastel)] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
+                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left"
                 style={{ zIndex: 1, display: "inline-block" }}
               >
                 <span className="relative z-10 px-2">Inicio</span>
               </Link>
             </li>
             <li>
+              {/*Para poner el borde redondo al rededor del menu*/}
+              {/*before:content-[''] before:absolute before:inset-[-6px_-14px] before:rounded-full before:bg-transparent before:border before:border-[2.5px] before:border-[var(--color-rosa-pastel)] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300*/}
               <Link
                 to="/mi-historia"
-                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left
-                  before:content-[''] before:absolute before:inset-[-6px_-14px] before:rounded-full before:bg-transparent before:border before:border-[2.5px] before:border-[var(--color-rosa-pastel)] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
+                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left"
                 style={{ zIndex: 1, display: "inline-block" }}
               >
                 <span className="relative z-10 px-2">Mi historia</span>
@@ -74,8 +74,7 @@ function Header() {
             <li>
               <Link
                 to="/reflexiones"
-                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left
-                  before:content-[''] before:absolute before:inset-[-6px_-14px] before:rounded-full before:bg-transparent before:border before:border-[2.5px] before:border-[var(--color-rosa-pastel)] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
+                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left"
                 style={{ zIndex: 1, display: "inline-block" }}
               >
                 <span className="relative z-10 px-2">Reflexiones</span>
@@ -84,8 +83,7 @@ function Header() {
             <li>
               <Link
                 to="/testimonios"
-                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left
-                  before:content-[''] before:absolute before:inset-[-6px_-14px] before:rounded-full before:bg-transparent before:border before:border-[2.5px] before:border-[var(--color-rosa-pastel)] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
+                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left"
                 style={{ zIndex: 1, display: "inline-block" }}
               >
                 <span className="relative z-10 px-2">Testimonios</span>
@@ -94,8 +92,7 @@ function Header() {
             <li>
               <Link
                 to="/productos"
-                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left
-                  before:content-[''] before:absolute before:inset-[-6px_-14px] before:rounded-full before:bg-transparent before:border before:border-[2.5px] before:border-[var(--color-rosa-pastel)] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
+                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left"
                 style={{ zIndex: 1, display: "inline-block" }}
               >
                 <span className="relative z-10 px-2">Productos</span>
@@ -104,8 +101,7 @@ function Header() {
             <li>
               <Link
                 to="/contacto"
-                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left
-                  before:content-[''] before:absolute before:inset-[-6px_-14px] before:rounded-full before:bg-transparent before:border before:border-[2.5px] before:border-[var(--color-rosa-pastel)] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
+                className="relative [font-family:var(--font-poppins)] font-semibold text-lg transition-colors duration-300 whitespace-nowrap after:content-[''] after:block after:h-[2px] after:bg-[var(--color-verde-menta-suave)] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left"
                 style={{ zIndex: 1, display: "inline-block" }}
               >
                 <span className="relative z-10 px-2">Contacto</span>
