@@ -13,7 +13,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface Produts {
-  esGratis: boolean;
+  es_gratis: boolean;
   id: number;
   titulo: string;
   descripcion: string;
@@ -123,7 +123,7 @@ function ProductsSection() {
               product.url_descarga_file,
               session,
               product.id,
-              product.esGratis
+              product.es_gratis
             );
             console.log("¡Descarga exitosa!");
             history.replaceState(null, "", location.pathname);
@@ -196,14 +196,10 @@ function ProductsSection() {
             <ProductsCard
               key={producto.id}
               productoId={producto.id}
-              esGratis={producto.esGratis}
+              esGratis={producto.es_gratis}
               titulo={producto.titulo}
               descripcion={producto.descripcion}
-              precio={
-                producto.precio.toLocaleUpperCase().includes("GRATIS")
-                  ? producto.precio
-                  : `$${producto.precio} USD`
-              }
+              precio={producto.precio}
               imagen={producto.imagen_url}
               boton={producto.boton_texto_tipo}
               urlDescarga={producto.url_descarga_file}

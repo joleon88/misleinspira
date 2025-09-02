@@ -4,6 +4,7 @@ import SubscriberModal from "./SuscriptorModal";
 import { type Session } from "@supabase/supabase-js";
 import OutlinedButton from "./OutLinedButton";
 import { downloadFile } from "../util/DownloadUtility";
+import PayCheckOut from "./PayCheckOut";
 
 interface CardProductoProps {
   imagen: string;
@@ -27,11 +28,17 @@ const ProductsCard = ({
   boton,
 }: CardProductoProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPayOpen, setIsPayOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
+  };
+
+  const handleOpenPay = () => {
+    console.log(esGratis);
+    setIsPayOpen(true);
   };
 
   const handleCloseModal = () => {
@@ -73,11 +80,13 @@ const ProductsCard = ({
           {descripcion}
         </p>
         <p className="[color:var(--color-verde-menta-suave)] font-bold text-base mb-4">
-          {precio}
+          {precio.toLocaleUpperCase().includes("GRATIS")
+            ? precio
+            : `$${precio} USD`}
         </p>
         <OutlinedButton
           className="mt-2 w-full"
-          onClick={handleOpenModal}
+          onClick={esGratis ? handleOpenModal : handleOpenPay}
           disabled={isDownloading}
         >
           {isDownloading ? "Preparando..." : boton}
@@ -95,6 +104,9 @@ const ProductsCard = ({
           onSubscriptionSuccess={handleDownload}
           productId={productoId}
         />
+      )}
+      {isPayOpen && (
+        <PayCheckOut onClose={() => setIsPayOpen(false)} precio={precio} />
       )}
     </div>
   );
