@@ -37,12 +37,16 @@ const ProductsCard = ({
   };
 
   const handleOpenPay = () => {
-    console.log(esGratis);
     setIsPayOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setDownloadError(null);
+  };
+
+  const handleClosePay = () => {
+    setIsPayOpen(false);
     setDownloadError(null);
   };
 
@@ -106,7 +110,11 @@ const ProductsCard = ({
         />
       )}
       {isPayOpen && (
-        <PayCheckOut onClose={() => setIsPayOpen(false)} precio={precio} />
+        <PayCheckOut
+          onClose={handleClosePay}
+          productId={productoId}
+          precio={precio}
+        />
       )}
     </div>
   );
