@@ -1,7 +1,8 @@
 // Esta es la función sin servidor que Vercel ejecutará.
 // Se ejecutará como un endpoint de API en /api/create-payment-intent.
+import Stripe from "stripe";
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe("stripe")(process.env.STRIPE_SECRET_KEY);
 
 module.exports = async (req, res) => {
   // Configuración de los encabezados CORS para permitir peticiones desde tu frontend
