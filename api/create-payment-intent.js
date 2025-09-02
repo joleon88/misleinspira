@@ -2,9 +2,10 @@
 // Se ejecutará como un endpoint de API en /api/create-payment-intent.
 import Stripe from "stripe";
 
-const stripe = new Stripe("stripe")(process.env.STRIPE_SECRET_KEY);
+// CORRECTO: La clave secreta se pasa directamente al constructor de Stripe.
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Configuración de los encabezados CORS para permitir peticiones desde tu frontend
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -49,4 +50,4 @@ module.exports = async (req, res) => {
       error: error.message,
     });
   }
-};
+}
