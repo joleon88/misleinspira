@@ -112,8 +112,8 @@ const ProductsCard = ({
       {isPayOpen && (
         <PayCheckOut
           onClose={handleClosePay}
-          productId={productoId}
           precio={precio}
+          productId={productoId}
         />
       )}
     </div>

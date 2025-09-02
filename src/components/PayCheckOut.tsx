@@ -1,4 +1,3 @@
-// src/components/PayCheckOut.tsx
 import { useState, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -10,8 +9,8 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import { CheckCircle, Loader2, Mail, Phone, User } from "lucide-react";
 import { createPortal } from "react-dom";
-import OutlinedButton from "./OutLinedButton";
 import { createClient } from "@supabase/supabase-js";
+import OutlinedButton from "./OutLinedButton";
 // Reemplaza con tu clave pública de Stripe
 // En un entorno profesional, esto se haría con una variable de entorno.
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
@@ -21,10 +20,271 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY!
 );
 
+// Se ha simplificado la interfaz para que solo contenga las props necesarias
 interface CheckoutFormProps {
   amount: string;
+  productId: number;
+  initialEmail?: string;
+  setIsEmailSent: (value: boolean) => void;
+  setIsExistingUser: (value: boolean) => void;
+  onConfirmedEmail: (email: string) => void;
 }
 
+// Se ha movido la definición del componente FUERA del componente principal
+const CheckoutForm = ({
+  amount,
+  productId,
+  initialEmail = "",
+  setIsEmailSent,
+  setIsExistingUser,
+  onConfirmedEmail,
+}: CheckoutFormProps) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState(initialEmail);
+  const [phone, setPhone] = useState("");
+  const [status, setStatus] = useState("initial");
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus("loading");
+
+    if (!stripe || !elements) {
+      toast.error("Stripe aún no está cargado.");
+      setStatus("initial");
+      return;
+    }
+
+    const cardElement = elements.getElement(CardElement);
+
+    if (!cardElement) {
+      setMessage(
+        "El campo de la tarjeta no se encontró. Por favor, recarga la página."
+      );
+      setStatus("initial");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Error al obtener el client secret.");
+      }
+      const { clientSecret } = data;
+
+      const { paymentIntent, error } = await stripe.confirmCardPayment(
+        clientSecret,
+        {
+          payment_method: {
+            card: cardElement,
+          },
+        }
+      );
+
+      if (error) {
+        toast.error(`Pago fallido: ${error.message}`);
+        console.error("Error de confirmación de pago:", error);
+      } else if (paymentIntent && paymentIntent.status === "succeeded") {
+        toast.success("¡Pago exitoso!");
+        try {
+          const redirectUrl = `${window.location.origin}/productos?product_id=${productId}`;
+
+          const { data: existingSubscriber, error: searchError } =
+            await supabase
+              .from("misleinspira_suscriptors")
+              .select("id")
+              .eq("email", email)
+              .maybeSingle();
+
+          if (searchError) {
+            console.error("Error al buscar suscriptor:", searchError.message);
+          }
+
+          const isExisting = existingSubscriber !== null;
+          setIsExistingUser(isExisting);
+
+          if (!isExisting) {
+            const { error: upsertError } = await supabase
+              .from("misleinspira_suscriptors")
+              .upsert([{ name, email, phone }], { onConflict: "email" });
+            if (upsertError) {
+              console.error(
+                "Error al guardar suscriptor:",
+                upsertError.message
+              );
+            }
+          }
+
+          const { error: otpError } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+              emailRedirectTo: redirectUrl,
+            },
+          });
+
+          if (otpError) throw otpError;
+
+          if (isExisting) {
+            toast.success("Enlace enviado.");
+          } else {
+            toast.success("¡Te has suscrito!");
+          }
+          onConfirmedEmail(email); // Pasa el correo al componente padre
+          setIsEmailSent(true);
+        } catch (err: any) {
+          console.error(err);
+          toast.error(
+            "Hubo un error al enviar el correo. Por favor, intenta de nuevo."
+          );
+        } finally {
+          setStatus("initial");
+        }
+      }
+    } catch (err) {
+      console.error("Error inesperado:", err);
+      toast.error("Ocurrió un error inesperado. Intenta de nuevo.");
+    } finally {
+      setStatus("initial");
+    }
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="p-8 space-y-4 rounded-3xl shadow-lg w-full max-w-lg mx-auto"
+      style={{ backgroundColor: "var(--color-beige-lino)" }}
+    >
+      <h2
+        className="!text-2xl md:text-3xl font-bold text-center mt-2"
+        style={{ color: "#4a4a4a", fontFamily: "Montserrat, sans-serif" }}
+      >
+        Completa tu compra
+      </h2>
+
+      {message && (
+        <div
+          className={`p-3 rounded-md text-center ${
+            message.includes("fallido") || message.includes("error")
+              ? "bg-red-100 text-red-700"
+              : "bg-green-100 text-green-700"
+          }`}
+        >
+          {message}
+        </div>
+      )}
+
+      <div className="relative">
+        <User
+          className="absolute left-3 top-1/2 -translate-y-1/2"
+          size={20}
+          style={{ color: "#5a5a5a" }}
+        />
+        <input
+          type="text"
+          placeholder="Tu nombre"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:[border-color:var(--color-rosa-pastel)] focus:ring-[var(--color-rosa-pastel)]"
+          style={{
+            borderColor: "#ddd",
+            fontFamily: "Poppins, sans-serif",
+            color: "#4a4a4a",
+          }}
+        />
+      </div>
+      <div className="relative">
+        <Mail
+          className="absolute left-3 top-1/2 -translate-y-1/2"
+          size={20}
+          style={{ color: "#5a5a5a" }}
+        />
+        <input
+          type="email"
+          placeholder="Correo electrónico"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          readOnly={initialEmail !== ""}
+          className={`w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:[border-color:var(--color-rosa-pastel)] focus:ring-[var(--color-rosa-pastel)] ${
+            initialEmail !== "" ? "bg-gray-100 cursor-not-allowed" : ""
+          }`}
+          style={{
+            borderColor: "#ddd",
+            fontFamily: "Poppins, sans-serif",
+            color: "#4a4a4a",
+          }}
+        />
+      </div>
+      <div className="relative">
+        <Phone
+          className="absolute left-3 top-1/2 -translate-y-1/2"
+          size={20}
+          style={{ color: "#5a5a5a" }}
+        />
+        <input
+          type="tel"
+          placeholder="Número de teléfono (opcional)"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:[border-color:var(--color-rosa-pastel)] focus:ring-[var(--color-rosa-pastel)]"
+          style={{
+            borderColor: "#ddd",
+            fontFamily: "Poppins, sans-serif",
+            color: "#4a4a4a",
+          }}
+        />
+      </div>
+
+      {/* El componente de Stripe maneja el input de la tarjeta de forma segura */}
+      <CardElement
+        options={{
+          style: {
+            base: {
+              fontSize: "16px",
+              color: "var(--color-gris-carbon)",
+              "::placeholder": {
+                color: "var(--color-gris-texto-suave)",
+              },
+            },
+            invalid: {
+              color: "var(--color-rosa-pastel)",
+            },
+          },
+        }}
+        className="p-4 border rounded-xl"
+      />
+
+      <OutlinedButton
+        className="w-full !mt-4 py-2"
+        type="submit"
+        disabled={!stripe || status === "loading"}
+      >
+        {status === "loading" && (
+          <Loader2
+            className="animate-spin"
+            size={20}
+            style={{ color: "#4a4a4a" }}
+          />
+        )}
+        {status === "loading" && <Loader2 className="animate-spin" size={20} />}
+        <span>{status === "loading" ? "Procesando…" : `Pagar $${amount}`}</span>
+      </OutlinedButton>
+
+      <Toaster position="bottom-center" />
+    </form>
+  );
+};
+
+// Se ha simplificado el componente principal
 interface PayCheckOutProps {
   onClose: () => void;
   precio: string;
@@ -38,258 +298,10 @@ function PayCheckOut({
   productId,
   initialEmail = "",
 }: PayCheckOutProps) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState(initialEmail);
-  const [phone, setPhone] = useState("");
-  const [status, setStatus] = useState("initial");
-  const [message, setMessage] = useState<string | null>(null);
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isExistingUser, setIsExistingUser] = useState(false);
-  const CheckoutForm = ({ amount }: CheckoutFormProps) => {
-    const stripe = useStripe();
-    const elements = useElements();
+  const [confirmedEmail, setConfirmedEmail] = useState("");
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      setStatus("loading");
-
-      // Asegúrate de que Stripe y Elements estén cargados
-      if (!stripe || !elements) {
-        toast.error("Stripe aún no está cargado.");
-        setStatus("initial");
-        return;
-      }
-
-      const cardElement = elements.getElement(CardElement);
-
-      if (!cardElement) {
-        setMessage(
-          "El campo de la tarjeta no se encontró. Por favor, recarga la página."
-        );
-        setStatus("initial");
-        return;
-      }
-
-      try {
-        // Paso 1: Obtener el client_secret de tu servidor.
-        // Aquí llamamos a la función serverless de Vercel.
-        const response = await fetch("/api/create-payment-intent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount }),
-        });
-
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.message || "Error al obtener el client secret.");
-        }
-        const { clientSecret } = data;
-
-        // Paso 2: Usar el client_secret para confirmar el pago en el frontend.
-        const { paymentIntent, error } = await stripe.confirmCardPayment(
-          clientSecret,
-          {
-            payment_method: {
-              card: cardElement,
-            },
-          }
-        );
-
-        if (error) {
-          toast.error(`Pago fallido: ${error.message}`);
-          console.error("Error de confirmación de pago:", error);
-        } else if (paymentIntent && paymentIntent.status === "succeeded") {
-          toast.success("¡Pago exitoso!");
-          // Aquí puedes realizar acciones adicionales, como actualizar Supabase
-          try {
-            const redirectUrl = `${window.location.origin}/productos?product_id=${productId}`;
-
-            const { data: existingSubscriber, error: searchError } =
-              await supabase
-                .from("misleinspira_suscriptors")
-                .select("id")
-                .eq("email", email)
-                .maybeSingle();
-
-            if (searchError) {
-              console.error("Error al buscar suscriptor:", searchError.message);
-            }
-
-            const isExisting = existingSubscriber !== null;
-            setIsExistingUser(isExisting);
-
-            if (!isExisting) {
-              const { error: upsertError } = await supabase
-                .from("misleinspira_suscriptors")
-                .upsert([{ name, email, phone }], { onConflict: "email" });
-              if (upsertError) {
-                console.error(
-                  "Error al guardar suscriptor:",
-                  upsertError.message
-                );
-              }
-            }
-
-            const { error: otpError } = await supabase.auth.signInWithOtp({
-              email,
-              options: {
-                emailRedirectTo: redirectUrl,
-              },
-            });
-
-            if (otpError) throw otpError;
-
-            if (isExisting) {
-              toast.success("Enlace enviado.");
-            } else {
-              toast.success("¡Te has suscrito!");
-            }
-
-            setIsEmailSent(true);
-          } catch (err: any) {
-            console.error(err);
-            toast.error(
-              "Hubo un error al enviar el correo. Por favor, intenta de nuevo."
-            );
-          } finally {
-            setStatus("initial");
-          }
-        }
-      } catch (err) {
-        console.error("Error inesperado:", err);
-        toast.error("Ocurrió un error inesperado. Intenta de nuevo.");
-      } finally {
-        setStatus("initial");
-      }
-    };
-
-    return (
-      <form
-        onSubmit={handleSubmit}
-        // El botón ahora maneja la acción
-        className="p-8 space-y-4 rounded-3xl shadow-lg w-full max-w-lg mx-auto"
-        style={{ backgroundColor: "var(--color-beige-lino)" }}
-      >
-        <h2
-          className="!text-2xl md:text-3xl font-bold text-center mt-2"
-          style={{ color: "#4a4a4a", fontFamily: "Montserrat, sans-serif" }}
-        >
-          Completa tu compra
-        </h2>
-
-        {message && (
-          <div
-            className={`p-3 rounded-md text-center ${
-              message.includes("fallido") || message.includes("error")
-                ? "bg-red-100 text-red-700"
-                : "bg-green-100 text-green-700"
-            }`}
-          >
-            {message}
-          </div>
-        )}
-
-        <div className="relative">
-          <User
-            className="absolute left-3 top-1/2 -translate-y-1/2"
-            size={20}
-            style={{ color: "#5a5a5a" }}
-          />
-          <input
-            type="text"
-            placeholder="Tu nombre"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className="w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:[border-color:var(--color-rosa-pastel)] focus:ring-[var(--color-rosa-pastel)]"
-            style={{
-              borderColor: "#ddd",
-              fontFamily: "Poppins, sans-serif",
-              color: "#4a4a4a",
-            }}
-          />
-        </div>
-        <div className="relative">
-          <Mail
-            className="absolute left-3 top-1/2 -translate-y-1/2"
-            size={20}
-            style={{ color: "#5a5a5a" }}
-          />
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            readOnly={initialEmail !== ""}
-            className={`w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:[border-color:var(--color-rosa-pastel)] focus:ring-[var(--color-rosa-pastel)] ${
-              initialEmail !== "" ? "bg-gray-100 cursor-not-allowed" : ""
-            }`}
-            style={{
-              borderColor: "#ddd",
-              fontFamily: "Poppins, sans-serif",
-              color: "#4a4a4a",
-            }}
-          />
-        </div>
-        <div className="relative">
-          <Phone
-            className="absolute left-3 top-1/2 -translate-y-1/2"
-            size={20}
-            style={{ color: "#5a5a5a" }}
-          />
-          <input
-            type="tel"
-            placeholder="Número de teléfono (opcional)"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:[border-color:var(--color-rosa-pastel)] focus:ring-[var(--color-rosa-pastel)]"
-            style={{
-              borderColor: "#ddd",
-              fontFamily: "Poppins, sans-serif",
-              color: "#4a4a4a",
-            }}
-          />
-        </div>
-
-        {/* El componente de Stripe maneja el input de la tarjeta de forma segura */}
-        <CardElement
-          options={{
-            style: {
-              base: {
-                fontSize: "16px",
-                color: "var(--color-gris-carbon)",
-                "::placeholder": {
-                  color: "var(--color-gris-texto-suave)",
-                },
-              },
-              invalid: {
-                color: "var(--color-rosa-pastel)",
-              },
-            },
-          }}
-          className="p-4 border rounded-xl"
-        />
-
-        <OutlinedButton
-          className="w-full mt-2 py-1"
-          type="submit"
-          disabled={!stripe || status === "loading"}
-        >
-          {status === "loading" && (
-            <Loader2 className="animate-spin" size={20} />
-          )}
-          <span>
-            {status === "loading" ? "Procesando…" : `Pagar $${amount}`}
-          </span>
-        </OutlinedButton>
-
-        <Toaster position="bottom-center" />
-      </form>
-    );
-  };
-
-  // Cerrar con ESC
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -350,7 +362,7 @@ function PayCheckOut({
                   ? "Ya eres parte de la comunidad. Te hemos enviado un enlace a "
                   : "¡Gracias por unirte a nuestra comunidad! Para completar la suscripción y acceder al producto, por favor, haz clic en el enlace de verificación que te hemos enviado a "}
                 <span className="font-semibold" style={{ color: "#f8c8dc" }}>
-                  {email}
+                  {confirmedEmail}
                 </span>
                 .
               </p>
@@ -362,7 +374,14 @@ function PayCheckOut({
               </p>
             </div>
           ) : (
-            <CheckoutForm amount={precio} />
+            <CheckoutForm
+              amount={precio}
+              productId={productId}
+              initialEmail={initialEmail}
+              setIsEmailSent={setIsEmailSent}
+              setIsExistingUser={setIsExistingUser}
+              onConfirmedEmail={setConfirmedEmail}
+            />
           )}
         </Elements>
       </div>
