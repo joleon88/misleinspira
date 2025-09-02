@@ -96,6 +96,7 @@ function PayCheckOut({ onClose, precio }: PayCheckOutProps) {
     return (
       <form
         onSubmit={handleSubmit}
+        // El botón ahora maneja la acción
         className="p-8 space-y-4 rounded-3xl shadow-lg w-full max-w-lg mx-auto"
         style={{ backgroundColor: "var(--color-beige-lino)" }}
       >
@@ -175,6 +176,7 @@ function PayCheckOut({ onClose, precio }: PayCheckOutProps) {
       <div
         className="relative z-10 p-0"
         style={{ minWidth: 350, maxWidth: 400, width: "100%" }}
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
