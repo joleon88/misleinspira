@@ -119,6 +119,13 @@ function ProductsSection() {
             }
 
             // Proceder con la descarga
+            console.log(
+              "Iniciando descarga para:",
+              product.url_descarga_file,
+              session,
+              product.id,
+              product.es_gratis
+            );
             await downloadFile(
               product.url_descarga_file,
               session,
