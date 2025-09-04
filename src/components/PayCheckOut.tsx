@@ -97,6 +97,7 @@ const CheckoutForm = ({
         try {
           console.log("El id del producto es:", productId);
           const redirectUrl = `${window.location.origin}/productos?product_id=${productId}`;
+          console.log(redirectUrl);
 
           const { data: existingSubscriber, error: searchError } =
             await supabase
