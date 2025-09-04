@@ -95,6 +95,7 @@ const CheckoutForm = ({
       } else if (paymentIntent && paymentIntent.status === "succeeded") {
         toast.success("¡Pago exitoso!");
         try {
+          console.log("El id del producto es:", productId);
           const redirectUrl = `${window.location.origin}/productos?product_id=${productId}`;
 
           const { data: existingSubscriber, error: searchError } =
