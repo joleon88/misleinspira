@@ -74,10 +74,7 @@ function ProductsSection() {
           return;
         }
 
-        console.log(
-          "Preparando la descarga para el ID del producto:",
-          productId
-        );
+        console.log("Preparando la descarga para el producto ID:", productId);
         const {
           data: { session },
         } = await supabase.auth.getSession();
