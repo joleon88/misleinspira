@@ -74,46 +74,50 @@ function ProductsSection() {
           return;
         }
 
-        console.log("Preparando la descarga para el producto ID:", productId);
+        console.log(
+          "Preparando la descarga para el ID del producto:",
+          productId
+        );
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
-        console.log("Sesión actual del usuario:", session);
+        // **CAMBIO IMPORTANTE:** Validar si la sesión es null.
+        if (!session) {
+          setError("Tu sesión ha expirado o el enlace es inválido.");
+          setLoading(false);
+          // Limpiar la URL para que no se quede en bucle.
+          history.replaceState(null, "", location.pathname);
+          return;
+        }
 
-        if (session) {
-          try {
-            const { data: product, error: productError } = await supabase
-              .from("misleinspira_products")
-              .select("*")
-              .eq("id", productId)
-              .single();
+        try {
+          const { data: product, error: productError } = await supabase
+            .from("misleinspira_products")
+            .select("*")
+            .eq("id", productId)
+            .single();
 
-            if (productError || !product) {
-              throw new Error("Producto no encontrado.");
-            }
-
-            // Llamada a la función de descarga que interactúa con la Edge Function.
-            // La Edge Function manejará la validación de si el token ya fue usado.
-            await downloadFile(
-              product.url_descarga_file,
-              session,
-              product.id,
-              product.es_gratis
-            );
-            console.log("¡Descarga exitosa!");
-          } catch (err) {
-            console.error("Error en el proceso de descarga:", err);
-            // El error se muestra en la interfaz para el usuario.
-            setError(
-              "Hubo un error al descargar el archivo. Es posible que el enlace ya haya sido utilizado."
-            );
-          } finally {
-            setLoading(false);
-            // IMPORTANTE: Limpia el product_id de la URL en todos los casos
-            // (éxito o error) para que el componente se recargue correctamente.
-            history.replaceState(null, "", location.pathname);
+          if (productError || !product) {
+            throw new Error("Producto no encontrado.");
           }
+
+          // La función de descarga ahora se ejecuta solo si la sesión es válida.
+          await downloadFile(
+            product.url_descarga_file,
+            session,
+            product.id,
+            product.es_gratis
+          );
+          console.log("¡Descarga exitosa!");
+        } catch (err) {
+          console.error("Error en el proceso de descarga:", err);
+          setError(
+            "Hubo un error al descargar el archivo. Es posible que el enlace ya haya sido utilizado."
+          );
+        } finally {
+          setLoading(false);
+          history.replaceState(null, "", location.pathname);
         }
       } else {
         // Si no hay product_id, cargamos todos los productos.
