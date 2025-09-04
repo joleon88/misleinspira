@@ -79,6 +79,8 @@ function ProductsSection() {
           data: { session },
         } = await supabase.auth.getSession();
 
+        console.log("Sesión actual del usuario:", session);
+
         if (session) {
           try {
             const { data: product, error: productError } = await supabase
