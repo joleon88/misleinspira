@@ -333,12 +333,8 @@ function PayCheckOut({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
-      if (
-        event === "SIGNED_IN" ||
-        event === "SIGNED_OUT" ||
-        event === "INITIAL_SESSION"
-      ) {
-        onClose();
+      if (event === "SIGNED_IN") {
+        setIsEmailSent(true);
         subscription.unsubscribe();
       }
     });
