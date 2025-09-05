@@ -323,7 +323,28 @@ function ProductsSection() {
         />
       </div>
       {/* El componente Toaster se renderiza aquí para mostrar las notificaciones */}
-      <Toaster position="bottom-right" />
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          // Define default options
+          className: "",
+          duration: 5000,
+          removeDelay: 1000,
+          style: {
+            background: "#f5efe6",
+            color: "#5a5a5a",
+          },
+
+          // Default options for specific types
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: "green",
+              secondary: "black",
+            },
+          },
+        }}
+      />
     </section>
   );
 }

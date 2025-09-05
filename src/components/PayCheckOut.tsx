@@ -270,18 +270,41 @@ const CheckoutForm = ({
         type="submit"
         disabled={!stripe || status === "loading"}
       >
-        {status === "loading" && (
-          <Loader2
-            className="animate-spin"
-            size={20}
-            style={{ color: "#4a4a4a" }}
-          />
-        )}
-        {status === "loading" && <Loader2 className="animate-spin" size={20} />}
-        <span>{status === "loading" ? "Procesando…" : `Pagar $${amount}`}</span>
+        <span>
+          {status === "loading" ? (
+            <div className="flex item-aline item-centers justify-center gap-2">
+              {" "}
+              <Loader2 className="animate-spin" size={20} />{" "}
+              <span>Procesando...</span>
+            </div>
+          ) : (
+            `Pagar $${amount}`
+          )}
+        </span>
       </OutlinedButton>
 
-      <Toaster position="bottom-center" />
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          // Define default options
+          className: "",
+          duration: 5000,
+          removeDelay: 1000,
+          style: {
+            background: "#f5efe6",
+            color: "#5a5a5a",
+          },
+
+          // Default options for specific types
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: "green",
+              secondary: "black",
+            },
+          },
+        }}
+      />
     </form>
   );
 };
@@ -303,6 +326,27 @@ function PayCheckOut({
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isExistingUser, setIsExistingUser] = useState(false);
   const [confirmedEmail, setConfirmedEmail] = useState("");
+
+  useEffect(() => {
+    // Escucha el evento de autenticación una sola vez para determinar el estado inicial.
+    // Esto es crucial para asegurar que la sesión de Supabase esté lista.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (
+        event === "SIGNED_IN" ||
+        event === "SIGNED_OUT" ||
+        event === "INITIAL_SESSION"
+      ) {
+        onClose();
+        subscription.unsubscribe();
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
