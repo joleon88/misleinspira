@@ -149,6 +149,7 @@ function ProductsSection() {
         }
       } else {
         // 2. Lógica de carga: si no hay product_id, cargamos todos los productos
+        console.log("Estoy en sesion = null");
         try {
           const { data, error } = await supabase
             .from("misleinspira_products")
@@ -168,6 +169,7 @@ function ProductsSection() {
             "No se pudieron cargar los productos. Por favor, inténtalo de nuevo."
           );
         } finally {
+          console.log("Mande a mostrar los productos.");
           setLoading(false);
         }
       }
