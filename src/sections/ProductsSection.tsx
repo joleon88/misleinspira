@@ -35,7 +35,7 @@ function ProductsSection() {
   const navigate = useNavigate();
   const hasDownloadAttempted = useRef(false);
 
-  // Detectar sesión inicial de Supabase
+  // ---- Detectar sesión inicial de Supabase ----
   useEffect(() => {
     const {
       data: { subscription },
@@ -55,114 +55,108 @@ function ProductsSection() {
     };
   }, []);
 
-  // Manejo de descarga automática y carga de productos
+  // ---- Efecto: Descarga automática ----
   useEffect(() => {
     if (!isAuthReady) return;
 
     const searchParams = new URLSearchParams(location.search);
     const productIdStr = searchParams.get("product_id");
 
-    const handleDownloadAndProducts = async () => {
-      setLoading(true);
+    if (!productIdStr) return;
 
-      // ---- Descarga automática si viene de un link con product_id ----
-      if (productIdStr) {
-        const productId = parseInt(productIdStr, 10);
-        if (isNaN(productId)) {
-          setLoading(false);
-          return;
-        }
+    const productId = parseInt(productIdStr, 10);
+    if (isNaN(productId)) return;
 
-        const guardKey = `downloaded_${productId}`;
+    const guardKey = `downloaded_${productId}`;
 
-        // ✅ Bloquea descarga si ya se intentó o está en localStorage
-        if (hasDownloadAttempted.current || localStorage.getItem(guardKey)) {
-          console.log("Descarga ya realizada antes.");
-          hasDownloadAttempted.current = true;
-          setLoading(false);
-          navigate(location.pathname, { replace: true });
-          return;
-        }
+    // Evita doble descarga
+    if (hasDownloadAttempted.current || localStorage.getItem(guardKey)) {
+      navigate(location.pathname, { replace: true });
+      return;
+    }
 
-        hasDownloadAttempted.current = true;
+    hasDownloadAttempted.current = true;
+    setLoading(true);
 
-        try {
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-          if (!session) {
-            setLoading(false);
-            return;
+    const doDownload = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session) return;
+
+        // Actualizar estado del usuario
+        const response = await fetch(
+          `${
+            import.meta.env.VITE_SUPABASE_URL
+          }/functions/v1/update-user-suscrito`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ email: session.user.email }),
           }
+        );
 
-          // Actualizar estado de usuario
-          const response = await fetch(
-            `${
-              import.meta.env.VITE_SUPABASE_URL
-            }/functions/v1/update-user-suscrito`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session.access_token}`,
-              },
-              body: JSON.stringify({ email: session.user.email }),
-            }
-          );
+        if (!response.ok)
+          throw new Error("Error al actualizar estado del usuario.");
 
-          if (!response.ok)
-            throw new Error("Error al actualizar estado del usuario.");
+        // Obtener producto
+        const { data: product, error: productError } = await supabase
+          .from("misleinspira_products")
+          .select("*")
+          .eq("id", productId)
+          .single();
 
-          // Obtener producto
-          const { data: product, error: productError } = await supabase
-            .from("misleinspira_products")
-            .select("*")
-            .eq("id", productId)
-            .single();
+        if (productError || !product)
+          throw new Error("Producto no encontrado.");
 
-          if (productError || !product)
-            throw new Error("Producto no encontrado.");
+        // Iniciar descarga
+        await downloadFile(
+          product.url_descarga_file,
+          session,
+          product.id,
+          product.es_gratis
+        );
 
-          // Iniciar descarga
-          await downloadFile(
-            product.url_descarga_file,
-            session,
-            product.id,
-            product.es_gratis
-          );
-
-          toast.success("¡Tu descarga ha comenzado con éxito!");
-          localStorage.setItem(guardKey, "true"); // bloquear repeticiones
-
-          // Limpiar URL sin disparar otra descarga
-          navigate(location.pathname, { replace: true });
-        } catch (err) {
-          console.error("Error en la descarga:", err);
-          toast.error("Hubo un error al descargar el archivo.");
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        // ---- Si no hay product_id: cargar productos desde Supabase ----
-        try {
-          const { data, error } = await supabase
-            .from("misleinspira_products")
-            .select("*")
-            .order("creado_en", { ascending: false });
-
-          if (error) throw error;
-          if (data) setProductos(data as Product[]);
-        } catch (err) {
-          console.error("Error fetching products:", err);
-          toast.error("No se pudieron cargar los productos.");
-        } finally {
-          setLoading(false);
-        }
+        toast.success("¡Tu descarga ha comenzado con éxito!");
+        localStorage.setItem(guardKey, "true"); // bloquea futuras descargas
+      } catch (err) {
+        console.error("Error en la descarga automática:", err);
+        toast.error("Hubo un error al descargar el archivo.");
+      } finally {
+        setLoading(false);
+        navigate(location.pathname, { replace: true }); // limpia la URL
       }
     };
 
-    handleDownloadAndProducts();
-  }, [isAuthReady]); // solo depende de la autenticación
+    doDownload();
+  }, [isAuthReady, location.pathname, navigate]);
+
+  // ---- Efecto: Carga de productos ----
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("misleinspira_products")
+          .select("*")
+          .order("creado_en", { ascending: false });
+
+        if (error) throw error;
+        if (data) setProductos(data as Product[]);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        toast.error("No se pudieron cargar los productos.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
     <section id="productos" className="container mx-auto py-24 px-4">
