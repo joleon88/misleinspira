@@ -23,7 +23,7 @@ interface Product {
   url_descarga_file: string;
   categoria: string;
   imagen_url: string;
-  creado_en?: string; // Asegúrate del nombre real de tu columna de fecha
+  creado_en?: string;
 }
 
 function ProductsSection() {
@@ -55,7 +55,7 @@ function ProductsSection() {
     };
   }, []);
 
-  // Manejo de descarga + carga de productos
+  // Manejo de descarga automática y carga de productos
   useEffect(() => {
     if (!isAuthReady) return;
 
@@ -66,9 +66,7 @@ function ProductsSection() {
       setLoading(true);
 
       // ---- Descarga automática si viene de un link con product_id ----
-      if (productIdStr && !hasDownloadAttempted.current) {
-        hasDownloadAttempted.current = true;
-
+      if (productIdStr) {
         const productId = parseInt(productIdStr, 10);
         if (isNaN(productId)) {
           setLoading(false);
@@ -76,12 +74,17 @@ function ProductsSection() {
         }
 
         const guardKey = `downloaded_${productId}`;
-        if (localStorage.getItem(guardKey)) {
-          console.log("Descarga ya realizada antes, se evita duplicado.");
+
+        // ✅ Bloquea descarga si ya se intentó o está en localStorage
+        if (hasDownloadAttempted.current || localStorage.getItem(guardKey)) {
+          console.log("Descarga ya realizada antes.");
+          hasDownloadAttempted.current = true;
           setLoading(false);
           navigate(location.pathname, { replace: true });
           return;
         }
+
+        hasDownloadAttempted.current = true;
 
         try {
           const {
@@ -107,9 +110,8 @@ function ProductsSection() {
             }
           );
 
-          if (!response.ok) {
+          if (!response.ok)
             throw new Error("Error al actualizar estado del usuario.");
-          }
 
           // Obtener producto
           const { data: product, error: productError } = await supabase
@@ -118,9 +120,8 @@ function ProductsSection() {
             .eq("id", productId)
             .single();
 
-          if (productError || !product) {
+          if (productError || !product)
             throw new Error("Producto no encontrado.");
-          }
 
           // Iniciar descarga
           await downloadFile(
@@ -132,7 +133,9 @@ function ProductsSection() {
 
           toast.success("¡Tu descarga ha comenzado con éxito!");
           localStorage.setItem(guardKey, "true"); // bloquear repeticiones
-          navigate(location.pathname, { replace: true }); // limpiar la URL
+
+          // Limpiar URL sin disparar otra descarga
+          navigate(location.pathname, { replace: true });
         } catch (err) {
           console.error("Error en la descarga:", err);
           toast.error("Hubo un error al descargar el archivo.");
@@ -159,7 +162,7 @@ function ProductsSection() {
     };
 
     handleDownloadAndProducts();
-  }, [isAuthReady]); // 👈 ya no depende de location.search
+  }, [isAuthReady]); // solo depende de la autenticación
 
   return (
     <section id="productos" className="container mx-auto py-24 px-4">
@@ -183,7 +186,7 @@ function ProductsSection() {
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-10 place-items-center">
         {productos
-          .filter((p) => p.categoria === "principal") // Verifica que en tu DB exista "principal"
+          .filter((p) => p.categoria === "principal")
           .map((producto) => (
             <ProductsCard
               key={producto.id}
