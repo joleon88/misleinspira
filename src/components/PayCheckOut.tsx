@@ -286,9 +286,6 @@ const CheckoutForm = ({
       <Toaster
         position="bottom-right"
         toastOptions={{
-          // Define default options
-          className: "",
-          duration: 5000,
           removeDelay: 1000,
           style: {
             background: "#f5efe6",
@@ -298,6 +295,7 @@ const CheckoutForm = ({
           // Default options for specific types
           success: {
             duration: 3000,
+            removeDelay: 1000,
             iconTheme: {
               primary: "green",
               secondary: "black",

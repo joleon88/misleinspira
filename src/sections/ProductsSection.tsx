@@ -3,7 +3,7 @@ import ProductsCard from "../components/ProductsCard";
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
 import checklistContenido from "../assets/checklistContenido.png";
 import guiadeNicho from "../assets/guiadeNicho.png";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useLocation } from "react-router-dom";
 import { downloadFile } from "../util/DownloadUtility";
@@ -28,9 +28,12 @@ interface Produts {
 function ProductsSection() {
   const [productos, setProductos] = useState<Produts[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [hasDownloaded, setHasDownloaded] = useState(false);
+
   const [isAuthReady, setIsAuthReady] = useState(false);
   const location = useLocation();
+
+  // Usamos un ref para rastrear si ya se intentó la descarga
+  const hasDownloadAttempted = useRef(false);
 
   useEffect(() => {
     // Escucha el evento de autenticación una sola vez para determinar el estado inicial.
@@ -64,7 +67,9 @@ function ProductsSection() {
 
     const handleDownloadAndProducts = async () => {
       setLoading(true);
-      if (productIdStr && !hasDownloaded) {
+      if (productIdStr && !hasDownloadAttempted.current) {
+        // Marcamos que ya se intentó la descarga para evitar la doble ejecución
+        hasDownloadAttempted.current = true;
         // 1. Lógica de descarga: si hay un product_id, nos enfocamos en descargar
         const productId = parseInt(productIdStr, 10);
         if (isNaN(productId)) {
@@ -82,9 +87,6 @@ function ProductsSection() {
         } = await supabase.auth.getSession();
         if (session) {
           try {
-            // Asegurarse de que no se descargue dos veces
-            setHasDownloaded(true);
-
             // Actualizar estado del usuario
             const response = await fetch(
               `${
@@ -176,7 +178,7 @@ function ProductsSection() {
     };
 
     handleDownloadAndProducts();
-  }, [isAuthReady, location.search, hasDownloaded]);
+  }, [isAuthReady, location.search]);
 
   return (
     <section id="productos" className="container mx-auto py-24 px-4">
@@ -329,8 +331,7 @@ function ProductsSection() {
         position="bottom-right"
         toastOptions={{
           // Define default options
-          className: "",
-          duration: 5000,
+
           removeDelay: 1000,
           style: {
             background: "#f5efe6",
@@ -340,6 +341,7 @@ function ProductsSection() {
           // Default options for specific types
           success: {
             duration: 3000,
+            removeDelay: 1000,
             iconTheme: {
               primary: "green",
               secondary: "black",
