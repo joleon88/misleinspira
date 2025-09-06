@@ -3,7 +3,7 @@ import ProductsCard from "../components/ProductsCard";
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
 import checklistContenido from "../assets/checklistContenido.png";
 import guiadeNicho from "../assets/guiadeNicho.png";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { downloadFile } from "../util/DownloadUtility";
@@ -33,144 +33,133 @@ function ProductsSection() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const hasDownloadAttempted = useRef(false);
 
-  // 1) Esperar a que Supabase inicialice la sesión (una sola vez)
+  // Detectar sesión inicial de Supabase
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
       if (
         event === "SIGNED_IN" ||
         event === "SIGNED_OUT" ||
         event === "INITIAL_SESSION"
       ) {
         setIsAuthReady(true);
+        subscription.unsubscribe();
       }
     });
+
     return () => {
-      sub.subscription?.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
-  // Utilidad para cargar productos
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("misleinspira_products")
-        .select("*")
-        // OJO: cambia "creado_en" por tu columna real (p. ej. "created_at")
-        .order("creado_en", { ascending: false });
-
-      if (error) throw error;
-      setProductos((data ?? []) as Product[]);
-    } catch (err) {
-      console.error("Error fetching products:", err);
-      toast.error(
-        "No se pudieron cargar los productos. Por favor, inténtalo de nuevo."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 2) Manejo de descarga por query param + carga de productos
+  // Manejo de descarga + carga de productos
   useEffect(() => {
     if (!isAuthReady) return;
 
-    const run = async () => {
-      const searchParams = new URLSearchParams(location.search);
-      const productIdStr = searchParams.get("product_id");
+    const searchParams = new URLSearchParams(location.search);
+    const productIdStr = searchParams.get("product_id");
 
-      // Si no hay product_id => solo cargar productos
-      if (!productIdStr) {
-        await fetchProducts();
-        return;
-      }
-
-      const productId = parseInt(productIdStr, 10);
-      if (Number.isNaN(productId)) {
-        // Limpia URL y carga productos de todas formas
-        navigate(location.pathname, { replace: true });
-        await fetchProducts();
-        return;
-      }
-
-      // Guard anti-doble descarga (sobrevive a remontajes de StrictMode)
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const guardKey = `downloaded_${productId}_${session?.user?.id ?? "anon"}`;
-      if (sessionStorage.getItem(guardKey)) {
-        // Ya descargado en este ciclo -> limpiar URL y cargar productos
-        navigate(location.pathname, { replace: true });
-        await fetchProducts();
-        return;
-      }
-
+    const handleDownloadAndProducts = async () => {
       setLoading(true);
-      try {
-        if (!session) {
-          // Si por alguna razón no hay sesión aquí, no intentes descargar
-          throw new Error("No hay sesión activa para realizar la descarga.");
+
+      // ---- Descarga automática si viene de un link con product_id ----
+      if (productIdStr && !hasDownloadAttempted.current) {
+        hasDownloadAttempted.current = true;
+
+        const productId = parseInt(productIdStr, 10);
+        if (isNaN(productId)) {
+          setLoading(false);
+          return;
         }
 
-        // Actualizar estado del usuario
-        const resp = await fetch(
-          `${
-            import.meta.env.VITE_SUPABASE_URL
-          }/functions/v1/update-user-suscrito`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({ email: session.user.email }),
+        const guardKey = `downloaded_${productId}`;
+        if (localStorage.getItem(guardKey)) {
+          console.log("Descarga ya realizada antes, se evita duplicado.");
+          setLoading(false);
+          navigate(location.pathname, { replace: true });
+          return;
+        }
+
+        try {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          if (!session) {
+            setLoading(false);
+            return;
           }
-        );
-        if (!resp.ok) {
-          throw new Error(
-            "Error al actualizar estado de verificación del usuario."
+
+          // Actualizar estado de usuario
+          const response = await fetch(
+            `${
+              import.meta.env.VITE_SUPABASE_URL
+            }/functions/v1/update-user-suscrito`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({ email: session.user.email }),
+            }
           );
+
+          if (!response.ok) {
+            throw new Error("Error al actualizar estado del usuario.");
+          }
+
+          // Obtener producto
+          const { data: product, error: productError } = await supabase
+            .from("misleinspira_products")
+            .select("*")
+            .eq("id", productId)
+            .single();
+
+          if (productError || !product) {
+            throw new Error("Producto no encontrado.");
+          }
+
+          // Iniciar descarga
+          await downloadFile(
+            product.url_descarga_file,
+            session,
+            product.id,
+            product.es_gratis
+          );
+
+          toast.success("¡Tu descarga ha comenzado con éxito!");
+          localStorage.setItem(guardKey, "true"); // bloquear repeticiones
+          navigate(location.pathname, { replace: true }); // limpiar la URL
+        } catch (err) {
+          console.error("Error en la descarga:", err);
+          toast.error("Hubo un error al descargar el archivo.");
+        } finally {
+          setLoading(false);
         }
+      } else {
+        // ---- Si no hay product_id: cargar productos desde Supabase ----
+        try {
+          const { data, error } = await supabase
+            .from("misleinspira_products")
+            .select("*")
+            .order("creado_en", { ascending: false });
 
-        // Obtener el producto
-        const { data: product, error: productError } = await supabase
-          .from("misleinspira_products")
-          .select("*")
-          .eq("id", productId)
-          .single();
-
-        if (productError || !product) {
-          throw new Error("Producto no encontrado.");
+          if (error) throw error;
+          if (data) setProductos(data as Product[]);
+        } catch (err) {
+          console.error("Error fetching products:", err);
+          toast.error("No se pudieron cargar los productos.");
+        } finally {
+          setLoading(false);
         }
-
-        // Descargar
-        await downloadFile(
-          product.url_descarga_file,
-          session,
-          product.id,
-          product.es_gratis
-        );
-
-        // Marca de una sola vez
-        sessionStorage.setItem(guardKey, "1");
-
-        toast.success("¡Tu descarga ha comenzado con éxito!");
-      } catch (err) {
-        console.error("Error en la descarga o actualización del usuario:", err);
-        toast.error(
-          "Hubo un error al descargar el archivo. Por favor, inténtalo de nuevo."
-        );
-      } finally {
-        // Limpia el query param *avisando* a React Router y luego carga productos
-        navigate(location.pathname, { replace: true });
-        await fetchProducts();
       }
     };
 
-    run();
-    // Dependo de isAuthReady y de location.search (cambios reales vía navigate)
-  }, [isAuthReady, location.pathname, location.search]); // incluimos pathname por seguridad
+    handleDownloadAndProducts();
+  }, [isAuthReady]); // 👈 ya no depende de location.search
 
   return (
     <section id="productos" className="container mx-auto py-24 px-4">
