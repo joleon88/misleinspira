@@ -95,6 +95,11 @@ function ProductsSection() {
           product.es_gratis &&
           (hasDownloadAttempted.current || localStorage.getItem(guardKey))
         ) {
+          console.log(
+            product.es_gratis,
+            hasDownloadAttempted.current,
+            localStorage.getItem(guardKey)
+          );
           navigate(location.pathname, { replace: true });
           return;
         }
