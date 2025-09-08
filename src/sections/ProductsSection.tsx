@@ -69,19 +69,7 @@ function ProductsSection() {
 
     const guardKey = `downloaded_${productId}`;
 
-    console.log("Estoy en el IF de producto si es gratis");
-    console.log(productos.find((p) => p.id === productId));
-    console.log(productos.find((p) => p.id === productId)?.es_gratis);
-
     // Evita doble descarga
-    if (
-      (productos.find((p) => p.id === productId)?.es_gratis &&
-        hasDownloadAttempted.current) ||
-      localStorage.getItem(guardKey)
-    ) {
-      navigate(location.pathname, { replace: true });
-      return;
-    }
 
     hasDownloadAttempted.current = true;
     setLoading(true);
@@ -92,6 +80,24 @@ function ProductsSection() {
           data: { session },
         } = await supabase.auth.getSession();
         if (!session) return;
+
+        // Obtener producto
+        const { data: product, error: productError } = await supabase
+          .from("misleinspira_products")
+          .select("*")
+          .eq("id", productId)
+          .single();
+
+        if (productError || !product)
+          throw new Error("Producto no encontrado.");
+
+        if (
+          (product.es_gratis && hasDownloadAttempted.current) ||
+          localStorage.getItem(guardKey)
+        ) {
+          navigate(location.pathname, { replace: true });
+          return;
+        }
 
         // Actualizar estado del usuario
         const response = await fetch(
@@ -110,16 +116,6 @@ function ProductsSection() {
 
         if (!response.ok)
           throw new Error("Error al actualizar estado del usuario.");
-
-        // Obtener producto
-        const { data: product, error: productError } = await supabase
-          .from("misleinspira_products")
-          .select("*")
-          .eq("id", productId)
-          .single();
-
-        if (productError || !product)
-          throw new Error("Producto no encontrado.");
 
         // Iniciar descarga
         await downloadFile(
