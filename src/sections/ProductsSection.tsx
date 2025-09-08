@@ -92,8 +92,8 @@ function ProductsSection() {
           throw new Error("Producto no encontrado.");
 
         if (
-          (product.es_gratis && hasDownloadAttempted.current) ||
-          localStorage.getItem(guardKey)
+          product.es_gratis &&
+          (hasDownloadAttempted.current || localStorage.getItem(guardKey))
         ) {
           navigate(location.pathname, { replace: true });
           return;
