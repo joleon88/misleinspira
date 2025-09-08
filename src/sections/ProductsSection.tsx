@@ -91,6 +91,11 @@ function ProductsSection() {
         if (productError || !product)
           throw new Error("Producto no encontrado.");
 
+        console.log("product:", product);
+        console.log("es_gratis:", product.es_gratis);
+        console.log("hasDownloadAttempted:", hasDownloadAttempted.current);
+        console.log("localStorage:", localStorage.getItem(guardKey));
+
         if (
           product.es_gratis &&
           (hasDownloadAttempted.current || localStorage.getItem(guardKey))
