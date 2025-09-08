@@ -70,7 +70,11 @@ function ProductsSection() {
     const guardKey = `downloaded_${productId}`;
 
     // Evita doble descarga
-    if (hasDownloadAttempted.current || localStorage.getItem(guardKey)) {
+    if (
+      (productos.find((p) => p.id === productId)?.es_gratis &&
+        hasDownloadAttempted.current) ||
+      localStorage.getItem(guardKey)
+    ) {
       navigate(location.pathname, { replace: true });
       return;
     }

@@ -111,7 +111,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
       onClick={onClose}
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
-      <Toaster position="bottom-center" />
+      <Toaster position="bottom-right" />
       <div
         className="rounded-3xl w-full max-w-lg p-8 relative"
         onClick={(e) => e.stopPropagation()}
