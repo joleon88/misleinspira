@@ -69,6 +69,10 @@ function ProductsSection() {
 
     const guardKey = `downloaded_${productId}`;
 
+    console.log("Estoy en el IF de producto si es gratis");
+    console.log(productos.find((p) => p.id === productId));
+    console.log(productos.find((p) => p.id === productId)?.es_gratis);
+
     // Evita doble descarga
     if (
       (productos.find((p) => p.id === productId)?.es_gratis &&
