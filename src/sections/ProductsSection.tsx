@@ -6,6 +6,7 @@ import guiadeNicho from "../assets/guiadeNicho.png";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useLocation, useNavigate } from "react-router-dom";
+import { type Session } from "@supabase/supabase-js";
 import { downloadFile } from "../util/DownloadUtility";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -27,6 +28,7 @@ interface Product {
 }
 
 function ProductsSection() {
+  const [session, setSession] = useState<Session | null>(null);
   const [productos, setProductos] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -39,7 +41,7 @@ function ProductsSection() {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       if (
         event === "SIGNED_IN" ||
         event === "SIGNED_OUT" ||
@@ -47,6 +49,9 @@ function ProductsSection() {
       ) {
         setIsAuthReady(true);
         subscription.unsubscribe();
+      }
+      if (newSession) {
+        setSession(newSession);
       }
     });
 
@@ -76,9 +81,6 @@ function ProductsSection() {
 
     const doDownload = async () => {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
         if (!session) return;
 
         // Obtener producto
@@ -100,11 +102,6 @@ function ProductsSection() {
           product.es_gratis &&
           (hasDownloadAttempted.current || localStorage.getItem(guardKey))
         ) {
-          console.log(
-            product.es_gratis,
-            hasDownloadAttempted.current,
-            localStorage.getItem(guardKey)
-          );
           navigate(location.pathname, { replace: true });
           return;
         }
