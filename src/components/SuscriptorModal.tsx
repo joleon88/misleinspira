@@ -47,6 +47,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   }, [isOpen, session]);
 
   useEffect(() => {
+    console.log("isOpen cambió:", isOpen);
     if (cerreModal && session) {
       console.log("Abrio modal despues de la descarga");
     }
