@@ -35,14 +35,14 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
     if (!isOpen) return;
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session) {
-        setSession(session);
+    } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      if (newSession) {
+        setSession(newSession);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [isOpen]);
+  }, [isOpen, session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

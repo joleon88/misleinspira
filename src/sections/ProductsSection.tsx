@@ -5,7 +5,7 @@ import checklistContenido from "../assets/checklistContenido.png";
 import guiadeNicho from "../assets/guiadeNicho.png";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { type Session } from "@supabase/supabase-js";
 import { downloadFile } from "../util/DownloadUtility";
 import toast, { Toaster } from "react-hot-toast";
@@ -34,7 +34,7 @@ function ProductsSection() {
   const [isAuthReady, setIsAuthReady] = useState(false);
 
   const location = useLocation();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   // ---- Detectar sesión inicial de Supabase ----
   useEffect(() => {
@@ -118,12 +118,12 @@ function ProductsSection() {
         toast.error("Hubo un error al descargar el archivo.");
       } finally {
         setLoading(false);
-        navigate(location.pathname, { replace: true }); // limpia la URL
+        //navigate(location.pathname, { replace: true }); // limpia la URL
       }
     };
 
     doDownload();
-  }, [isAuthReady, session, location.pathname, navigate]);
+  }, [isAuthReady, session, location.pathname]);
 
   // ---- Efecto: Carga de productos ----
   useEffect(() => {
