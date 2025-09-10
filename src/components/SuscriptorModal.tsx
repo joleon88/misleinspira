@@ -50,7 +50,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
     if (cerreModal && session) {
       console.log("Abrio modal despues de la descarga");
     }
-  }, []);
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
