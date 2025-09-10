@@ -12,9 +12,10 @@ const supabase = createClient(
 
 interface SubscriberModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (fromForm: boolean) => void;
   initialEmail?: string;
   productId: number;
+  cerreModal?: boolean;
 }
 
 const SuscriptorModal: React.FC<SubscriberModalProps> = ({
@@ -22,6 +23,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   onClose,
   initialEmail = "",
   productId,
+  cerreModal,
 }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState(initialEmail);
@@ -43,6 +45,12 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
 
     return () => subscription.unsubscribe();
   }, [isOpen, session]);
+
+  useEffect(() => {
+    if (cerreModal && session) {
+      console.log("Abrio modal despues de la descarga");
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +112,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   return createPortal(
     <div
       className="fixed inset-0 z-[1050] flex items-center justify-center p-4"
-      onClick={onClose}
+      onClick={() => onClose(!isEmailSent)}
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
       <Toaster position="bottom-right" />
@@ -116,7 +124,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
         <button
           className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"
           aria-label="Cerrar"
-          onClick={onClose}
+          onClick={() => onClose(!isEmailSent)}
         >
           <svg
             className="w-6 h-6"
@@ -255,15 +263,16 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
                 type="submit"
                 disabled={status === "loading"}
               >
-                {status === "loading" && (
-                  <Loader2
-                    className="animate-spin"
-                    size={20}
-                    style={{ color: "#4a4a4a" }}
-                  />
-                )}
                 <span>
-                  {status === "loading" ? "Enviando…" : "Suscribirse"}
+                  {status === "loading" ? (
+                    <div className="flex item-aline item-centers justify-center gap-2">
+                      {" "}
+                      <Loader2 className="animate-spin" size={20} />{" "}
+                      <span>Enviando...</span>
+                    </div>
+                  ) : (
+                    "Suscribirse"
+                  )}
                 </span>
               </OutlinedButton>
             </div>

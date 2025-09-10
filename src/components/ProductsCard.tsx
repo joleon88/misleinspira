@@ -28,8 +28,8 @@ const ProductsCard = ({
 }: CardProductoProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPayOpen, setIsPayOpen] = useState(false);
-  
-  
+
+  const [cerreModal, setCerreModal] = useState(false);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -39,17 +39,16 @@ const ProductsCard = ({
     setIsPayOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = (fromForm: boolean) => {
+    if (!fromForm) {
+      setCerreModal(true);
+    }
     setIsModalOpen(false);
-    
   };
 
   const handleClosePay = () => {
     setIsPayOpen(false);
-    
   };
-
-  
 
   return (
     <div className="min-h-[320px] w-full max-w-[300px] [background-color:var(--color-blanco)] rounded-2xl shadow-md hover:shadow-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300">
@@ -78,12 +77,13 @@ const ProductsCard = ({
           {isModalOpen || isPayOpen ? "Preparando..." : boton}
         </OutlinedButton>
       </div>
-      
+
       {isModalOpen && (
         <SubscriberModal
           isOpen={isModalOpen}
-          onClose={handleCloseModal}          
+          onClose={handleCloseModal}
           productId={productoId}
+          cerreModal={cerreModal}
         />
       )}
       {isPayOpen && (
