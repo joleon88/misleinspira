@@ -15,7 +15,6 @@ interface SubscriberModalProps {
   onClose: () => void;
   initialEmail?: string;
   productId: number;
-  
 }
 
 const SuscriptorModal: React.FC<SubscriberModalProps> = ({
@@ -23,7 +22,6 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   onClose,
   initialEmail = "",
   productId,
-  
 }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState(initialEmail);
@@ -40,13 +38,11 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
         setSession(session);
-        
-        onClose();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
