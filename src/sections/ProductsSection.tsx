@@ -3,7 +3,7 @@ import ProductsCard from "../components/ProductsCard";
 import bienestarLaboral from "../assets/bienestarLaboral.jpg";
 import checklistContenido from "../assets/checklistContenido.png";
 import guiadeNicho from "../assets/guiadeNicho.png";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { type Session } from "@supabase/supabase-js";
@@ -35,7 +35,6 @@ function ProductsSection() {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const hasDownloadAttempted = useRef(false);
 
   // ---- Detectar sesión inicial de Supabase ----
   useEffect(() => {
@@ -72,15 +71,9 @@ function ProductsSection() {
     const productId = parseInt(productIdStr, 10);
     if (isNaN(productId)) return;
 
-    const guardKey = `downloaded_${productId}`;
-
-    // Evita doble descarga
-
-    hasDownloadAttempted.current = true;
-    setLoading(true);
-
     const doDownload = async () => {
       try {
+        setLoading(true);
         if (!session) return;
 
         // Obtener producto
@@ -92,19 +85,6 @@ function ProductsSection() {
 
         if (productError || !product)
           throw new Error("Producto no encontrado.");
-
-        console.log("product:", product);
-        console.log("es_gratis:", product.es_gratis);
-        console.log("hasDownloadAttempted:", hasDownloadAttempted.current);
-        console.log("localStorage:", localStorage.getItem(guardKey));
-
-        if (
-          product.es_gratis &&
-          (hasDownloadAttempted.current || localStorage.getItem(guardKey))
-        ) {
-          navigate(location.pathname, { replace: true });
-          return;
-        }
 
         // Actualizar estado del usuario
         const response = await fetch(
@@ -133,7 +113,6 @@ function ProductsSection() {
         );
 
         toast.success("¡Tu descarga ha comenzado con éxito!");
-        localStorage.setItem(guardKey, "true"); // bloquea futuras descargas
       } catch (err) {
         console.error("Error en la descarga automática:", err);
         toast.error("Hubo un error al descargar el archivo.");
@@ -144,7 +123,7 @@ function ProductsSection() {
     };
 
     doDownload();
-  }, [isAuthReady, location.pathname, navigate]);
+  }, [isAuthReady, session, location.pathname, navigate]);
 
   // ---- Efecto: Carga de productos ----
   useEffect(() => {

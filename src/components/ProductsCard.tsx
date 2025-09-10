@@ -1,9 +1,9 @@
 import { useState } from "react";
 
 import SubscriberModal from "./SuscriptorModal";
-import { type Session } from "@supabase/supabase-js";
+
 import OutlinedButton from "./OutLinedButton";
-import { downloadFile } from "../util/DownloadUtility";
+
 import PayCheckOut from "./PayCheckOut";
 
 interface CardProductoProps {
@@ -22,15 +22,14 @@ const ProductsCard = ({
   titulo,
   descripcion,
   precio,
-  urlDescarga,
   productoId,
   esGratis,
   boton,
 }: CardProductoProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPayOpen, setIsPayOpen] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState<string | null>(null);
+  
+  
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -42,32 +41,15 @@ const ProductsCard = ({
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setDownloadError(null);
+    
   };
 
   const handleClosePay = () => {
     setIsPayOpen(false);
-    setDownloadError(null);
+    
   };
 
-  /**
-   * Maneja el flujo de descarga después de una suscripción o inicio de sesión exitosos.
-   * Llama a la función de utilidad para manejar la lógica de la Edge Function.
-   */
-  const handleDownload = async (session: Session) => {
-    setIsDownloading(true);
-    setDownloadError(null);
-
-    try {
-      // Llama a la función de utilidad para gestionar la descarga
-      await downloadFile(urlDescarga, session, productoId, esGratis);
-    } catch (error: any) {
-      setDownloadError(error.message);
-    } finally {
-      setIsDownloading(false);
-      handleCloseModal();
-    }
-  };
+  
 
   return (
     <div className="min-h-[320px] w-full max-w-[300px] [background-color:var(--color-blanco)] rounded-2xl shadow-md hover:shadow-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300">
@@ -91,21 +73,16 @@ const ProductsCard = ({
         <OutlinedButton
           className="mt-2 w-full"
           onClick={esGratis ? handleOpenModal : handleOpenPay}
-          disabled={isDownloading}
+          disabled={isModalOpen || isPayOpen}
         >
-          {isDownloading ? "Preparando..." : boton}
+          {isModalOpen || isPayOpen ? "Preparando..." : boton}
         </OutlinedButton>
       </div>
-      {downloadError && (
-        <div className="text-red-500 text-center mt-2 px-4">
-          {downloadError}
-        </div>
-      )}
+      
       {isModalOpen && (
         <SubscriberModal
           isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onSubscriptionSuccess={handleDownload}
+          onClose={handleCloseModal}          
           productId={productoId}
         />
       )}
