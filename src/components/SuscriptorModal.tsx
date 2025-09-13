@@ -36,13 +36,15 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    // Consultar la sesión actual al montar el modal
+
+    // Consultar la sesión actual
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
         setSession(data.session);
       }
     });
 
+    // Escuchar cambios de autenticación
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
@@ -51,15 +53,9 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, [isOpen, session]);
-
-  useEffect(() => {
-    const fetchDownloadProduct = async () => {
-      console.log("Valor cerre modal:", cerreModal);
-      console.log("Valor session:", session);
-      if (cerreModal && session) {
-        console.log("Abrio modal despues de la descarga");
+    // Intentar descarga cuando cerreModal y session están listos
+    if (cerreModal && session) {
+      (async () => {
         try {
           const { data: product, error: productError } = await supabase
             .from("misleinspira_products")
@@ -79,11 +75,11 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
         } catch (error) {
           toast.error("Error al intentar descargar el producto.");
         }
-      }
-    };
+      })();
+    }
 
-    fetchDownloadProduct();
-  }, [isOpen]);
+    return () => subscription.unsubscribe();
+  }, [isOpen, cerreModal, session, productId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
