@@ -4,6 +4,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Mail, User, Phone, Loader2, CheckCircle } from "lucide-react";
 import { createPortal } from "react-dom";
 import OutlinedButton from "./OutLinedButton";
+import { downloadFile } from "../util/DownloadUtility";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL!,
@@ -35,6 +36,13 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
+    // Consultar la sesión actual al montar el modal
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        setSession(data.session);
+      }
+    });
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
@@ -47,11 +55,34 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   }, [isOpen, session]);
 
   useEffect(() => {
-    console.log("Valor cerre modal:", cerreModal);
-    console.log("Valor session:", session);
-    if (cerreModal && session) {
-      console.log("Abrio modal despues de la descarga");
-    }
+    const fetchDownloadProduct = async () => {
+      console.log("Valor cerre modal:", cerreModal);
+      console.log("Valor session:", session);
+      if (cerreModal && session) {
+        console.log("Abrio modal despues de la descarga");
+        try {
+          const { data: product, error: productError } = await supabase
+            .from("misleinspira_products")
+            .select("*")
+            .eq("id", productId)
+            .single();
+
+          if (productError || !product)
+            throw new Error("Producto no encontrado.");
+
+          await downloadFile(
+            product.url_descarga_file,
+            session,
+            product.id,
+            product.es_gratis
+          );
+        } catch (error) {
+          toast.error("Error al intentar descargar el producto.");
+        }
+      }
+    };
+
+    fetchDownloadProduct();
   }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
