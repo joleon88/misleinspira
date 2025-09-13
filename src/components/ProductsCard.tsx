@@ -40,12 +40,12 @@ const ProductsCard = ({
   };
 
   const handleCloseModal = (fromForm: boolean) => {
-    if (!fromForm) {
+    if (fromForm) {
       setCerreModal(true);
     } else {
       console.log("Cerrando modal desde el formulario");
     }
-
+    console.log("Valor de cerre modal:", cerreModal);
     setIsModalOpen(false);
   };
 

@@ -47,7 +47,8 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   }, [isOpen, session]);
 
   useEffect(() => {
-    console.log("isOpen cambió:", isOpen);
+    console.log("Valor cerre modal:", cerreModal);
+    console.log("Valor session:", session);
     if (cerreModal && session) {
       console.log("Abrio modal despues de la descarga");
     }
@@ -113,7 +114,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   return createPortal(
     <div
       className="fixed inset-0 z-[1050] flex items-center justify-center p-4"
-      onClick={() => onClose(!isEmailSent)}
+      onClick={() => onClose(isEmailSent)}
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
       <Toaster position="bottom-right" />
@@ -125,7 +126,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
         <button
           className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"
           aria-label="Cerrar"
-          onClick={() => onClose(!isEmailSent)}
+          onClick={() => onClose(isEmailSent)}
         >
           <svg
             className="w-6 h-6"
