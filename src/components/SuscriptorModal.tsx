@@ -35,6 +35,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   const [isExistingUser, setIsExistingUser] = useState(false);
 
   useEffect(() => {
+    console.log("👉 useEffect corriendo, isOpen:", isOpen);
     if (!isOpen) return;
 
     // Consultar la sesión actual
