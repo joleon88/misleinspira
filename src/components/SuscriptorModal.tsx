@@ -56,7 +56,6 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
 
     // Intentar descarga cuando cerreModal y session están listos
     console.log("Valor cerreMoadal en Modal:", cerreModal);
-    console.log("Valor session en Modal:", session);
     if (cerreModal && session) {
       (async () => {
         try {
