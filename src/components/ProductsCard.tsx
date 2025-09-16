@@ -29,6 +29,8 @@ const ProductsCard = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPayOpen, setIsPayOpen] = useState(false);
 
+  console.log("Renderizando ProductsCard - isModalOpen:", isModalOpen);
+
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
