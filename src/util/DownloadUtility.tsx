@@ -36,12 +36,8 @@ export async function downloadFile(
       );
     }
 
-    // Forzar descarga en el navegador
-    const link = document.createElement("a");
-    link.href = data.signedUrl;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Abrir descarga en otra pestaña
+    window.open(data.signedUrl, "_blank");
   } catch (err) {
     console.error("Error al descargar:", err);
     throw new Error("Hubo un error al descargar el archivo.");
