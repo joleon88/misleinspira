@@ -35,52 +35,50 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   const [isExistingUser, setIsExistingUser] = useState(false);
 
   useEffect(() => {
-    console.log("👉 useEffect corriendo, isOpen:", isOpen);
-    if (!isOpen) return;
+    let ignore = false;
 
-    // Consultar la sesión actual
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
+      if (!ignore && data.session) {
         setSession(data.session);
       }
     });
 
-    // Escuchar cambios de autenticación
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      if (newSession) {
-        setSession(newSession);
-      }
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (!ignore) setSession(newSession);
     });
 
-    // Intentar descarga cuando cerreModal y session están listos
-    console.log("Valor cerreMoadal en Modal:", cerreModal);
-    if (cerreModal && session) {
-      (async () => {
-        try {
-          const { data: product, error: productError } = await supabase
-            .from("misleinspira_products")
-            .select("*")
-            .eq("id", productId)
-            .single();
+    return () => {
+      ignore = true;
+      subscription.unsubscribe();
+    };
+  }, []); // <-- solo al montar
 
-          if (productError || !product)
-            throw new Error("Producto no encontrado.");
+  useEffect(() => {
+    if (!isOpen || !cerreModal || !session) return;
 
-          await downloadFile(
-            product.url_descarga_file,
-            session,
-            product.id,
-            product.es_gratis
-          );
-        } catch (error) {
-          toast.error("Error al intentar descargar el producto.");
-        }
-      })();
-    }
+    (async () => {
+      try {
+        const { data: product, error: productError } = await supabase
+          .from("misleinspira_products")
+          .select("*")
+          .eq("id", productId)
+          .single();
 
-    return () => subscription.unsubscribe();
+        if (productError || !product)
+          throw new Error("Producto no encontrado.");
+
+        await downloadFile(
+          product.url_descarga_file,
+          session,
+          product.id,
+          product.es_gratis
+        );
+      } catch (error) {
+        toast.error("Error al intentar descargar el producto.");
+      }
+    })();
   }, [isOpen, cerreModal, session, productId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
