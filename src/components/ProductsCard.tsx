@@ -29,8 +29,6 @@ const ProductsCard = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPayOpen, setIsPayOpen] = useState(false);
 
-  const [cerreModal, setCerreModal] = useState(false);
-
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
@@ -40,13 +38,7 @@ const ProductsCard = ({
   };
 
   const handleCloseModal = (fromForm: boolean) => {
-    if (fromForm) {
-      setCerreModal(true);
-    } else {
-      console.log("Cerrando modal desde el formulario");
-    }
-    console.log("Valor de cerre modal:", cerreModal);
-    setIsModalOpen(false);
+    if (fromForm) setIsModalOpen(false);
   };
 
   const handleClosePay = () => {
@@ -86,7 +78,6 @@ const ProductsCard = ({
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           productId={productoId}
-          cerreModal={cerreModal}
         />
       )}
       {isPayOpen && (

@@ -16,7 +16,6 @@ interface SubscriberModalProps {
   onClose: (fromForm: boolean) => void;
   initialEmail?: string;
   productId: number;
-  cerreModal?: boolean;
 }
 
 const SuscriptorModal: React.FC<SubscriberModalProps> = ({
@@ -24,7 +23,6 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   onClose,
   initialEmail = "",
   productId,
-  cerreModal,
 }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState(initialEmail);
@@ -33,30 +31,45 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   const [session, setSession] = useState<Session | null>(null);
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isExistingUser, setIsExistingUser] = useState(false);
+  const [justSignedIn, setJustSignedIn] = useState(false); // 🔥 nueva bandera
 
   useEffect(() => {
+    console.log("Entre a useEffect de getSession y onAuthStateChange");
     let ignore = false;
 
     supabase.auth.getSession().then(({ data }) => {
       if (!ignore && data.session) {
         setSession(data.session);
+        setJustSignedIn(false); // si ya había sesión guardada, no es recién validada
       }
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      if (!ignore) setSession(newSession);
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (!ignore) {
+        setSession(newSession);
+
+        if (event === "SIGNED_IN" && newSession) {
+          setJustSignedIn(true); // 🔥 marcar que acabamos de entrar
+          onClose(true); // 🔥 cerrar modal inmediatamente
+        }
+      }
     });
 
     return () => {
       ignore = true;
       subscription.unsubscribe();
     };
-  }, []); // <-- solo al montar
+  }, []);
 
+  // ⬇️ descarga solo si:
+  // - modal está abierto
+  // - hay sesión
+  // - NO es un login recién hecho (para evitar doble descarga)
   useEffect(() => {
-    if (!isOpen || !cerreModal || !session) return;
+    console.log("Entre a useEffect de descarga");
+    if (!isOpen || !session || justSignedIn) return;
 
     (async () => {
       try {
@@ -79,7 +92,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
         toast.error("Error al intentar descargar el producto.");
       }
     })();
-  }, [isOpen, cerreModal, session, productId]);
+  }, [isOpen, session, productId, justSignedIn]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,7 +154,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   return createPortal(
     <div
       className="fixed inset-0 z-[1050] flex items-center justify-center p-4"
-      onClick={() => onClose(session ? true : false)}
+      onClick={() => onClose(true)}
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
       <Toaster position="bottom-right" />
@@ -153,7 +166,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
         <button
           className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100"
           aria-label="Cerrar"
-          onClick={() => onClose(session ? true : false)}
+          onClick={() => onClose(true)}
         >
           <svg
             className="w-6 h-6"
@@ -178,7 +191,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
               className="text-xl font-semibold"
               style={{ color: "#4a4a4a", fontFamily: "Montserrat, sans-serif" }}
             >
-              ¡Autenticación exitosa!
+              ¡Autenticad@!
             </h2>
             <p style={{ color: "#5a5a5a", fontFamily: "Poppins, sans-serif" }}>
               La descarga se iniciará en un momento…
