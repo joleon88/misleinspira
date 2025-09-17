@@ -18,9 +18,20 @@ function HeroSection() {
           {/* Eliminado 'md:' de text-center para que aplique en móviles por defecto */}
           <h1 className="[color:var(--color-gris-carbon)] text-5xl md:text-6xl lg:text-7xl mb-1 leading-tight">
             Despierta tu{" "}
-            <span className="[color:var(--color-rosa-pastel)]">Potencial</span>.
-            Vive con{" "}
-            <span className="[color:var(--color-rosa-pastel)]">Propósito</span>.
+            <span
+              className="[color:var(--color-rosa-pastel)]"
+              style={{ textShadow: "2px 2px 4px black" }}
+            >
+              Potencial
+            </span>
+            . Vive con{" "}
+            <span
+              className="[color:var(--color-rosa-pastel)]"
+              style={{ textShadow: "2px 2px 4px black" }}
+            >
+              Propósito
+            </span>
+            .
           </h1>
           {/* Lista de ideas con palomitas */}
           <ul className="text-lg text-left md:text-xl lg:text-2xl mb-8 space-y-3 [color:var(--color-gris-texto-suave)]">

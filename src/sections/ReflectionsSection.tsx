@@ -64,7 +64,12 @@ function ReflectionsSection() {
       <div className="text-center mb-16">
         <h2 className="[color:var(--color-gris-carbon)] text-4xl md:text-5xl mb-4">
           Semillas de{" "}
-          <span className="[color:var(--color-rosa-pastel)]">Reflexión</span>
+          <span
+            className="[color:var(--color-rosa-pastel)]"
+            style={{ textShadow: "2px 2px 4px black" }}
+          >
+            Reflexión
+          </span>
         </h2>
         <p className="max-w-3xl mx-auto text-lg md:text-xl">
           Un espacio para nutrir tu mente y espíritu con pensamientos, artículos

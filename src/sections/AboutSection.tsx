@@ -1,5 +1,6 @@
 // src/sections/AboutSection.tsx
 
+import { Link } from "react-router-dom";
 import OutlinedButton from "../components/OutLinedButton";
 
 function AboutSection() {
@@ -7,8 +8,20 @@ function AboutSection() {
     <section id="mi-historia" className="container mx-auto py-24 px-4">
       <div className="text-center mb-16">
         <h2 className="[color:var(--color-gris-carbon)] text-4xl md:text-5xl mb-4">
-          Mi <span className="[color:var(--color-rosa-pastel)]">Viaje</span>, Mi{" "}
-          <span className="[color:var(--color-rosa-pastel)]">Esencia</span>
+          Mi{" "}
+          <span
+            className="[color:var(--color-rosa-pastel)]"
+            style={{ textShadow: "2px 2px 4px black" }}
+          >
+            Viaje
+          </span>
+          , Mi{" "}
+          <span
+            className="[color:var(--color-rosa-pastel)]"
+            style={{ textShadow: "2px 2px 4px black" }}
+          >
+            Esencia
+          </span>
         </h2>
         <p className="max-w-3xl mx-auto text-lg md:text-xl">
           Descubre el camino que me llevó a crear MisleInspira y mi compromiso
@@ -55,9 +68,9 @@ function AboutSection() {
         </div>
       </div>
       <div className="flex items-center justify-center">
-        <OutlinedButton href="/contacto" className="mt-2">
-          Conóceme Más
-        </OutlinedButton>
+        <Link to="/contacto">
+          <OutlinedButton className="mt-2">Conóceme Más</OutlinedButton>
+        </Link>
       </div>
     </section>
   );

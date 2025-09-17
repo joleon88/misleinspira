@@ -10,10 +10,7 @@ import TestimonialsSection from "./sections/TestimonialsSection.tsx";
 import ProductsSection from "./sections/ProductsSection.tsx";
 import AboutSection from "./sections/AboutSection.tsx";
 import AuthComponent from "./components/AuthComponent.tsx";
-
-
-
-
+import ScrollToTop from "./components/ScrollToTop.tsx";
 
 function App() {
   return (
@@ -23,7 +20,7 @@ function App() {
       <div className="min-h-screen flex flex-col">
         {/* El Header ya no necesita la prop onNavigate, usará <Link> directamente */}
         <Header />
-
+        <ScrollToTop />
         <main className="flex-grow">
           <Routes>
             {" "}
@@ -49,6 +46,5 @@ function App() {
     </BrowserRouter>
   );
 }
-
 
 export default App;

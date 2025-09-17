@@ -153,7 +153,12 @@ function ProductsSection() {
       <div className="text-center mb-16">
         <h2 className="[color:var(--color-gris-carbon)] text-4xl md:text-5xl mb-4">
           Nuestras{" "}
-          <span className="[color:var(--color-rosa-pastel)]">Soluciones</span>{" "}
+          <span
+            className="[color:var(--color-rosa-pastel)]"
+            style={{ textShadow: "2px 2px 4px black" }}
+          >
+            Soluciones
+          </span>{" "}
           para Ti
         </h2>
         <p className="max-w-3xl mx-auto text-lg md:text-xl">

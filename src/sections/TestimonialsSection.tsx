@@ -15,7 +15,12 @@ function TestimonialsSection() {
       <div className="text-center mb-16">
         <h2 className="[color:var(--color-gris-carbon)] text-4xl md:text-5xl mb-4">
           Testimonios que Inspiran{" "}
-          <span className="[color:var(--color-rosa-pastel)]">Crecimiento</span>
+          <span
+            className="[color:var(--color-rosa-pastel)]"
+            style={{ textShadow: "2px 2px 4px black" }}
+          >
+            Crecimiento
+          </span>
         </h2>
         <p className="max-w-3xl mx-auto text-lg md:text-xl">
           Cada experiencia compartida siembra una nueva semilla de confianza y

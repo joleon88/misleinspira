@@ -11,7 +11,13 @@ function ContactPage() {
       <div className="container mx-auto px-4">
         <h2 className="[color:var(--color-gris-carbon)] text-4xl md:text-5xl mb-4">
           Hablemos. Crea tu{" "}
-          <span className="[color:var(--color-rosa-pastel)]">Historia</span>.
+          <span
+            className="[color:var(--color-rosa-pastel)]"
+            style={{ textShadow: "2px 2px 4px black" }}
+          >
+            Historia
+          </span>
+          .
         </h2>
         <p className="max-w-3xl mx-auto text-lg md:text-xl mb-16">
           Estoy aquí para escucharte y ayudarte a dar el siguiente paso en tu
