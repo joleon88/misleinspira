@@ -67,9 +67,11 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
   // - modal está abierto
   // - hay sesión
   // - NO es un login recién hecho (para evitar doble descarga)
+  const shouldDownload =
+    isOpen && session !== null && !justSignedIn && !!productId;
   useEffect(() => {
     console.log("Entre a useEffect de descarga");
-    if (!isOpen || !session || justSignedIn) return;
+    if (!shouldDownload) return;
 
     (async () => {
       try {
@@ -92,7 +94,7 @@ const SuscriptorModal: React.FC<SubscriberModalProps> = ({
         toast.error("Error al intentar descargar el producto.");
       }
     })();
-  }, [isOpen, session, productId, justSignedIn]);
+  }, [shouldDownload]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
