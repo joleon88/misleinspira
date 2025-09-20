@@ -11,6 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Name of the storage bucket for product images
 const BUCKET_NAME = "product-images";
+const BUCKET_FILE_NAME = "content-files";
 
 // Inferred colors from your website's CSS variables
 const colorRosaPastel = "var(--color-rosa-pastel)";
@@ -30,8 +31,10 @@ const AddProducts: React.FC = () => {
     categoria: "",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const filePdfInputRef = useRef<HTMLInputElement>(null);
 
   // Handles changes in form input fields
   const handleChange = (
@@ -50,6 +53,13 @@ const AddProducts: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setImageFile(e.target.files[0]);
+    }
+  };
+
+  // Handles pdf file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPdfFile(e.target.files[0]);
     }
   };
 
@@ -78,6 +88,26 @@ const AddProducts: React.FC = () => {
     return publicUrl;
   };
 
+  // Uploads the image to Supabase Storage
+  const uploadPdf = async (): Promise<string | null> => {
+    if (!pdfFile) {
+      return null;
+    }
+
+    const fileName = `${pdfFile.name.replace(/\s/g, "-")}`;
+    const { error } = await supabase.storage
+      .from(BUCKET_FILE_NAME)
+      .upload(fileName, pdfFile);
+
+    if (error) {
+      console.error("Error uploading producto:", error);
+      toast.error("Error al subir el producto digital. Intenta de nuevo.");
+      return null;
+    }
+
+    return fileName;
+  };
+
   // Handles form submission, uploads image, and saves product data
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,10 +123,20 @@ const AddProducts: React.FC = () => {
         }
       }
 
+      let namePdfUrl = null;
+      if (pdfFile) {
+        namePdfUrl = await uploadPdf();
+        if (!namePdfUrl) {
+          setLoading(false);
+          return;
+        }
+      }
+
       // Prepares data to be inserted into the database
       const productData = {
         ...formData,
         imagen_url: imageUrl,
+        url_descarga_file: namePdfUrl,
       };
 
       const { error } = await supabase
@@ -121,6 +161,11 @@ const AddProducts: React.FC = () => {
       // Resets the file input field
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
+      }
+      setPdfFile(null);
+      // Resets the file input field
+      if (filePdfInputRef.current) {
+        filePdfInputRef.current.value = "";
       }
     } catch (error: any) {
       console.error("Error adding product:", JSON.stringify(error, null, 2));
@@ -225,7 +270,7 @@ const AddProducts: React.FC = () => {
                 className="block text-sm font-medium mb-1"
                 style={{ color: colorGrisCarbon }}
               >
-                Texto del Botón
+                Texto del Botón de Descarga
               </label>
               <input
                 type="text"
@@ -257,24 +302,8 @@ const AddProducts: React.FC = () => {
               style={{ borderColor: "#ddd" }}
             />
           </div>
-          <div>
-            <label
-              className="block text-sm font-medium mb-1"
-              style={{ color: colorGrisCarbon }}
-            >
-              URL de Descarga (opcional)
-            </label>
-            <input
-              type="text"
-              name="url_descarga_file"
-              value={formData.url_descarga_file}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-rosa-pastel)]"
-              style={{ borderColor: "#ddd" }}
-            />
-          </div>
 
-          {/* Custom styled file input */}
+          {/* Custom styled image input */}
           <div>
             <label
               className="block text-sm font-medium mb-1"
@@ -308,6 +337,48 @@ const AddProducts: React.FC = () => {
                   {imageFile
                     ? imageFile.name
                     : "Haz clic o arrastra una imagen aquí"}
+                </span>
+                <span className="text-xs text-gray-500 mt-1">
+                  Tamaño máximo: 5MB
+                </span>
+              </div>
+            </label>
+          </div>
+
+          {/* Custom styled file input */}
+          <div>
+            <label
+              className="block text-sm font-medium mb-1"
+              style={{ color: colorGrisCarbon }}
+            >
+              Seleccione el Producto
+            </label>
+            <label
+              htmlFor="file-upload"
+              className="w-full flex items-center justify-center p-4 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200"
+              style={{
+                borderColor: colorRosaPastel,
+                backgroundColor: "rgba(255, 182, 193, 0.1)",
+              }}
+            >
+              <input
+                id="file-upload"
+                type="file"
+                ref={filePdfInputRef}
+                onChange={handleFileChange}
+                accept="application/pdf"
+                required
+                className="hidden"
+              />
+              <div className="flex flex-col items-center">
+                <UploadCloud size={32} style={{ color: colorRosaPastel }} />
+                <span
+                  className="mt-2 text-sm font-semibold"
+                  style={{ color: colorRosaPastel }}
+                >
+                  {pdfFile
+                    ? pdfFile.name
+                    : "Haz clic o arrastra una archivo(pdf) aquí"}
                 </span>
                 <span className="text-xs text-gray-500 mt-1">
                   Tamaño máximo: 5MB
