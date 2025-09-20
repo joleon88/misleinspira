@@ -29,6 +29,7 @@ const AddProducts: React.FC = () => {
     boton_texto_tipo: "",
     url_descarga_file: "",
     categoria: "",
+    es_gratis: true,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -74,6 +75,9 @@ const AddProducts: React.FC = () => {
       .from(BUCKET_NAME)
       .upload(fileName, imageFile);
 
+    console.log("Estoy subiendo la imagen:", fileName);
+    console.log("Estoy subiendo error:", error);
+
     if (error) {
       console.error("Error uploading image:", error);
       toast.error("Error al subir la imagen. Intenta de nuevo.");
@@ -91,6 +95,15 @@ const AddProducts: React.FC = () => {
   // Uploads the image to Supabase Storage
   const uploadPdf = async (): Promise<string | null> => {
     if (!pdfFile) {
+      return null;
+    }
+
+    // Verifica que el usuario esté autenticado
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error("Debes iniciar sesión para subir archivos.");
       return null;
     }
 
@@ -137,6 +150,7 @@ const AddProducts: React.FC = () => {
         ...formData,
         imagen_url: imageUrl,
         url_descarga_file: namePdfUrl,
+        es_gratis: formData.precio.toLowerCase() === "¡gratis!",
       };
 
       const { error } = await supabase
@@ -156,6 +170,7 @@ const AddProducts: React.FC = () => {
         boton_texto_tipo: "",
         url_descarga_file: "",
         categoria: "",
+        es_gratis: true,
       });
       setImageFile(null);
       // Resets the file input field
