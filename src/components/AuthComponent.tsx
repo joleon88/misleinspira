@@ -26,9 +26,11 @@ const AuthComponent: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   // Effect to listen for auth state changes
   useEffect(() => {
+    console.log("Entre al useEfect de getSession y onAuthStateChange.");
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
@@ -43,6 +45,25 @@ const AuthComponent: React.FC = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    console.log("Entre al useEfect session:", session);
+    const fetchUserRole = async () => {
+      if (session?.user) {
+        const { data, error } = await supabase
+          .from("misleinspira_users")
+          .select("role")
+          .eq("id", session.user.id) // mismo id que en tu tabla users
+          .single();
+
+        if (!error && data) {
+          setRole(data.role);
+        }
+      }
+    };
+
+    fetchUserRole();
+  }, [session]);
 
   /**
    * Handles user sign in with email and password.
@@ -81,7 +102,7 @@ const AuthComponent: React.FC = () => {
   // Renders the UI based on the user's authentication state
   return (
     <>
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="bottom-right" reverseOrder={false} />
 
       {!session ? (
         // Login Form Wrapper: This div has the centering and spacing styles
@@ -135,10 +156,23 @@ const AuthComponent: React.FC = () => {
             </form>
           </div>
         </div>
-      ) : (
+      ) : role === "admin" ? (
         // Dashboard Wrapper: This div has the full-screen layout styles only
         <div className="w-full h-screen">
           <Dashboard session={session} handleSignOut={handleSignOut} />
+        </div>
+      ) : (
+        // 🚫 Usuario logeado pero NO admin → acceso denegado
+        <div className="min-h-screen flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            No tienes permisos para acceder a esta página
+          </h2>
+          <button
+            onClick={handleSignOut}
+            className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600"
+          >
+            Cerrar sesión
+          </button>
         </div>
       )}
     </>
