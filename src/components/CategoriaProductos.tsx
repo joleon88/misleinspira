@@ -1,14 +1,16 @@
 import ProductsCard from "./ProductsCard";
 
 interface Producto {
-  imagen: string;
+  es_gratis: boolean;
+  id: number;
   titulo: string;
   descripcion: string;
   precio: string;
-  urlDescarga: string;
-  boton: string;
-  productoId: number;
-  esGratis: boolean;
+  boton_texto_tipo: string;
+  url_descarga_file: string;
+  categoria?: string;
+  imagen_url: string;
+  creado_en?: string;
 }
 
 interface CategoriaProductosProps {
@@ -26,8 +28,18 @@ export const CategoriaProductos = ({
         {titulo}
       </h3>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-10 place-items-center">
-        {productos.map((producto, index) => (
-          <ProductsCard key={index} {...producto} />
+        {productos.map((producto) => (
+          <ProductsCard
+            key={producto.id}
+            imagen={producto.imagen_url}
+            titulo={producto.titulo}
+            descripcion={producto.descripcion}
+            precio={producto.precio}
+            urlDescarga={producto.url_descarga_file}
+            productoId={producto.id}
+            esGratis={producto.es_gratis}
+            boton={producto.boton_texto_tipo}
+          />
         ))}
       </div>
     </section>

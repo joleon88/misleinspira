@@ -30,7 +30,6 @@ const AuthComponent: React.FC = () => {
 
   // Effect to listen for auth state changes
   useEffect(() => {
-    console.log("Entre al useEfect de getSession y onAuthStateChange.");
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
@@ -47,7 +46,6 @@ const AuthComponent: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Entre al useEfect session:", session);
     const fetchUserRole = async () => {
       if (session?.user) {
         const { data, error } = await supabase
