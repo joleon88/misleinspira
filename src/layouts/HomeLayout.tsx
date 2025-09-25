@@ -37,10 +37,10 @@ function HomeLayout() {
   return (
     <>
       <HeroSection />
+      <ProductsSection />
       <AboutSection />
       <ReflectionsSection />
       <TestimonialsSection />
-      <ProductsSection />
     </>
   );
 }
